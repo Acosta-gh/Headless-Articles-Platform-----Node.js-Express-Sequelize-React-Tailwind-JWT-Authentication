@@ -23,14 +23,9 @@ async function createImage(req, res) {
       return res.status(400).json({ error: "Missing tempId" });
     }
 
-    // ✅ Usa filename si existe, o saca el nombre desde path
     const fileName = req.file.filename || req.file.path.split("/").pop();
     const imageUrl = `/uploads/${fileName}`;
 
-    // Log de verificación
-    console.log("Creando imagen con:", { tempId, url: imageUrl });
-
-    // ✅ Crear registro
     const image = await imageService.createImage({
       tempId,
       url: imageUrl,
@@ -38,7 +33,7 @@ async function createImage(req, res) {
 
     return res.status(201).json(image);
   } catch (error) {
-    console.error("Error creando imagen:", error);
+    console.error("Error while creating image:", error);
     return res.status(500).json({ error: error.message });
   }
 }

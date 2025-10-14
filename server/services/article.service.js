@@ -1,19 +1,25 @@
-// services/article.service.js
-const {Article, User, Comment, Like, Image} = require('@/models/index');
+const {Article, User, Category, Comment, Like, Image} = require('@/models/index');
+const { adoptTempImages } = require('@/utils/imageUtils');
+
 const fs = require('fs');
 const path = require('path');
 
 const createArticle = async (data) => {
   try {
-    const article = await Article.create(data);
+    const { categoryIds, tempId, ...articleData } = data;
 
-    if(data.tempId){
-      const images = await Image.findAll({ where: { tempId: data.tempId } });
-      await Promise.all(images.map(img => img.update({ articleId: article.id, tempId: null })));
-      
-      article.tempId = null;
-      await article.save();
+    const article = await Article.create(articleData);
+
+    if (Array.isArray(categoryIds)) {
+      if (categoryIds.length > 0) {
+        const categories = await Category.findAll({ where: { id: categoryIds } });
+        await article.setCategories(categories);
+      } else {
+        await article.setCategories([]);
+      } 
     }
+
+    await adoptTempImages(tempId, article.id);
 
     return article;
   } catch (error) {
@@ -23,42 +29,53 @@ const createArticle = async (data) => {
 
 const getAllArticles = async () => {
   try {
-    const articles = await Article.findAll({include: [
-      {
-        model: User,
-        as: 'author',
-        attributes: ['id', 'username', 'email']
-      },
-      {
-        model: Image,
-        as: 'images',
-        attributes: ['id', 'url']
-      },
-      {
-        model: Comment,
-        as: 'comments',
-        include: [{
+    const articles = await Article.findAll({
+      include: [
+        {
           model: User,
-          as: 'user',
+          as: 'author',
           attributes: ['id', 'username', 'email']
-        }],
-        include: [{
+        },
+        {
+          model: Image,
+          as: 'images',
+          attributes: ['id', 'url']
+        },
+        {
           model: Comment,
-          as: 'replies',
-          include: [{
-            model: User,
-            as: 'user',
-            attributes: ['id', 'username', 'email']
-          }]
-        }],
-        attributes: ['id', 'content', 'userId', 'articleId', 'createdAt']
-      },
-      {
-        model: Like,
-        as: 'likes',
-        attributes: ['id', 'userId']
-      } 
-    ]});
+          as: 'comments',
+          attributes: ['id', 'content', 'userId', 'articleId', 'createdAt'],
+          include: [
+            {
+              model: User,
+              as: 'user',
+              attributes: ['id', 'username', 'email']
+            },
+            {
+              model: Comment,
+              as: 'replies',
+              include: [
+                {
+                  model: User,
+                  as: 'user',
+                  attributes: ['id', 'username', 'email']
+                }
+              ]
+            }
+          ]
+        },
+        {
+          model: Like,
+          as: 'likes',
+          attributes: ['id', 'userId']
+        },
+         {
+          model: Category,
+          as: 'categories',
+          attributes: ['id', 'name']
+        }
+      ]
+    });
     return articles;
   } catch (error) {
     throw new Error("Error fetching articles: " + error.message);
@@ -82,27 +99,36 @@ const getArticleById = async (id) => {
         {
           model: Comment,
           as: 'comments',
-          include: [{
-            model: User,
-            as: 'user',
-            attributes: ['id', 'username', 'email']
-          }],
-          include: [{
-            model: Comment,
-            as: 'replies',
-            include: [{
+          attributes: ['id', 'content', 'userId', 'articleId', 'createdAt'],
+          include: [
+            {
               model: User,
               as: 'user',
               attributes: ['id', 'username', 'email']
-            }]
-          }],
-          attributes: ['id', 'content', 'userId', 'articleId', 'createdAt']
+            },
+            {
+              model: Comment,
+              as: 'replies',
+              include: [
+                {
+                  model: User,
+                  as: 'user',
+                  attributes: ['id', 'username', 'email']
+                }
+              ]
+            }
+          ]
         },
         {
           model: Like,
           as: 'likes',
           attributes: ['id', 'userId']
-        } 
+        },
+        {
+          model: Category,
+          as: 'categories',
+          attributes: ['id', 'name']
+        }
       ]
     });
     if (!article) {
@@ -120,7 +146,22 @@ const updateArticle = async (id, data) => {
     if (!article) {
       throw new Error("Article not found");
     }
-    await article.update(data);
+
+    const { categoryIds, tempId, ...articleData } = data;
+
+    await article.update(articleData);
+
+    if (Array.isArray(categoryIds)) {
+      if (categoryIds.length > 0) {
+        const categories = await Category.findAll({ where: { id: categoryIds } });
+        await article.setCategories(categories);
+      } else {
+        await article.setCategories([]); // Limpia todas si se envía []
+      }
+    }
+
+    await adoptTempImages(tempId, article.id);
+
     return article;
   } catch (error) {
     throw new Error("Error updating article: " + error.message);
@@ -149,7 +190,7 @@ const deleteArticle = async (id) => {
       await img.destroy();
     }
 
-    if(article.banner){
+    if (article.banner) {
       const bannerPath = path.join(__dirname, '../uploads', path.basename(article.banner));
       console.log("Deleting banner image at path:", bannerPath);
       fs.unlink(bannerPath, (err) => {

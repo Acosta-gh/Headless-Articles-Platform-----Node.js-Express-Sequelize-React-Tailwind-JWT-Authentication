@@ -23,6 +23,7 @@ const Comment = sequelize.define(
   },
   {
     timestamps: true,
+    paranoid: true, // Enables soft deletes
   }
 );
 

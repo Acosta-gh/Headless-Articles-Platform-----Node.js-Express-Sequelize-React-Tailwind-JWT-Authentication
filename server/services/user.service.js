@@ -1,17 +1,45 @@
 // services/user.service.js
-const { User } = require("@/models/index");
+const { User } = require("@/models/index"); // Import User model
 
-const { toSafeUser } = require('@/utils/toSafeUser');
-const saltRounds = parseInt(process.env.SALT_ROUNDS, 10) || 10;
-const bcrypt = require("bcrypt");
+const { toSafeUser } = require("@/utils/toSafeUser"); // Exclude sensitive info
+
+const saltRounds = parseInt(process.env.SALT_ROUNDS, 10) || 10; // For bcrypt
+const bcrypt = require("bcrypt"); // Hash passwords
+
+const { jwtSecret, jwtExpiration } = require("@/configs/auth"); // JWT config
+const jwt = require("jsonwebtoken"); // JWT handling
+
+const { verifyEmail } = require("@/utils/templates/verifyEmail"); // Email template
+const { sendEmail } = require("@/utils/emailUtils"); // Email sending utility
+
+const EMAIL_SECRET_KEY = process.env.EMAIL_SECRET_KEY || "your_email_secret_key";
 
 const registerUser = async (data) => {
   try {
+    const existingUser = await User.findOne({ where: { email: data.email } });
+    if (existingUser) {
+      throw new Error("Email already in use");
+    }
     const hashedPassword = await bcrypt.hash(data.password, saltRounds);
-    const user = await User.create({ ...data, password: hashedPassword });
+    const user = await User.create({
+      ...data,
+      password: hashedPassword,
+      admin: false,
+      verified: false,
+    });
 
-    console.log("User created successfully:", toSafeUser(user));
-    return toSafeUser(user);
+    const safeUser = toSafeUser(user);
+    const token = jwt.sign({ id: user.id, admin: user.admin }, jwtSecret, {
+      expiresIn: jwtExpiration,
+    });
+
+    const emailToken = jwt.sign({ id: user.id }, EMAIL_SECRET_KEY, { expiresIn: "1d" });
+
+    const verificationLink = `${process.env.FRONTEND_URL}/verify?token=${emailToken}`;
+    const html = verifyEmail(user.name, verificationLink);
+    await sendEmail(user.email, "Verify your email", html);
+
+    return { user: safeUser, token };
   } catch (error) {
     console.error("Error creating user:", error);
     throw new Error("Error creating user: " + error.message);
@@ -29,7 +57,15 @@ const loginUser = async (data) => {
       return null;
     }
 
-    return toSafeUser(user);
+    if(!user.verified) {
+      throw new Error("Email not verified. Please check your inbox.");
+    }
+    
+    const token = jwt.sign({ id: user.id, admin: user.admin }, jwtSecret, {
+      expiresIn: jwtExpiration,
+    });
+    
+    return { user: toSafeUser(user), token };
   } catch (error) {
     throw new Error("Error logging in user: " + error.message);
   }

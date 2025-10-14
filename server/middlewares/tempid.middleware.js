@@ -3,14 +3,13 @@ const SECRET = process.env.JWT_SECRET || "your_jwt_secret_key";
 
 function verifyTempIdToken(req, res, next) {
   const tempIdToken = req.headers["x-tempid-token"];
-    
-  console.log("Verifying:", tempIdToken);
-
-  const tempId = req.body?.tempId || req.query?.tempId || req.headers["x-tempid"];
+  const tempId = req.body?.tempId;
   
+  console.log("Verifying:", tempIdToken);
   console.log("tempId", tempId);
 
   if (!tempIdToken || !tempId) {
+    console.error("Missing tempId or token");
     return res.status(400).json({ error: "There is no tempId or x-tempid-token." });
   }
   

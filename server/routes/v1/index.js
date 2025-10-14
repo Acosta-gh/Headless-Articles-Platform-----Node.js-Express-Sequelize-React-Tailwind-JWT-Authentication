@@ -8,7 +8,13 @@ const userRoutes = require('@/routes/v1/user.routes');
 const commentRoutes = require('@/routes/v1/comment.routes');
 const tempIdRoutes = require('@/routes/v1/tempid.routes');
 const imageRoutes = require('@/routes/v1/image.routes');
+const categoryRoutes = require('@/routes/v1/category.routes');
+const verifyRoutes = require('@/routes/v1/verify.routes');
 
+// Use verify routes for any requests to /verify
+router.use('/verify', verifyRoutes);
+// Use category routes for any requests to /category
+router.use('/category', categoryRoutes);
 // Use image routes for any requests to /image
 router.use('/image', imageRoutes);
 // Use temp ID routes for any requests to /tempid

@@ -19,6 +19,10 @@ const User = sequelize.define(
       allowNull: false,
       unique: true,
     },
+    admin: { // Whether the user has admin privileges
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
     password: { // Hashed password
       type: DataTypes.STRING,
       allowNull: false,

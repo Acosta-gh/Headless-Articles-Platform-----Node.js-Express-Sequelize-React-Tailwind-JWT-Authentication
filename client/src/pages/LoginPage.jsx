@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { useAuth } from "@/hooks/useAuth";
 
@@ -26,6 +26,7 @@ const LoginPage = ({
     const { name, value } = e.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,6 +34,7 @@ const LoginPage = ({
 
     try {
       await login(data);
+      navigate("/profile");
     } catch (error) {
       console.error("Login error:", error);
     }

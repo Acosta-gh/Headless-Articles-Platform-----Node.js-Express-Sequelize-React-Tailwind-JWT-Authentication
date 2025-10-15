@@ -6,12 +6,21 @@ import {
   updateArticle,
   deleteArticle,
 } from "@/services/article.services";
+import { useAuth } from "@/hooks/useAuth";
+import { jwtDecode } from "jwt-decode";
+import { toast } from "sonner";
 
 export const useArticles = () => {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const { token } = useAuth();
 
+  const decoded = token ? jwtDecode(token) : null;
+
+  /*
+   * Fetch all articles from the server
+   */
   const fetchArticles = useCallback(async () => {
     setLoading(true);
     try {
@@ -24,10 +33,22 @@ export const useArticles = () => {
     }
   }, []);
 
+  /*
+    * Create a new article
+    @param {Object} articleData - Data for the new article
+    @param {string} tempIdToken - Temporary ID to associate the article with image uploads
+    @returns {Object} The created article
+  */
   const createNewArticle = async (articleData, tempIdToken) => {
     setLoading(true);
     try {
-      const newArticle = await createArticle(articleData, tempIdToken);
+      console.log(
+        "Creating article with data:",
+        articleData,
+        "and tempIdToken:",
+        tempIdToken
+      );
+      const newArticle = await createArticle(articleData, tempIdToken, token);
       setArticles((prevArticles) => [newArticle, ...prevArticles]);
       return newArticle;
     } catch (error) {
@@ -38,6 +59,9 @@ export const useArticles = () => {
     }
   };
 
+  /*
+   * Fetch articles on mount
+   */
   useEffect(() => {
     fetchArticles();
   }, [fetchArticles]);

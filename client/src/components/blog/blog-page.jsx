@@ -1,8 +1,8 @@
 import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { BlogPostCard } from "@/components/ui/blog-post-card";
-import { FeaturedPostSidebarItem } from "@/components/ui/featured-post-sidebar-item";
+import { BlogPostCard } from "@/components/blog/blog-post-card";
+import { FeaturedPostSidebarItem } from "@/components/blog/featured-post-sidebar-item";
 
 const BlogPage = () => {
   return (

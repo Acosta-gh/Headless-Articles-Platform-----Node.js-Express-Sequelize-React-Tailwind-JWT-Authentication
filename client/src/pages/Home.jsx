@@ -1,6 +1,6 @@
 import React from "react";
 import Hero from "@/components/home/Hero";
-import BlogPage from "../components/ui/blog-page";
+import BlogPage from "@/components/blog/blog-page";
 function Home() {
   return (
     <>

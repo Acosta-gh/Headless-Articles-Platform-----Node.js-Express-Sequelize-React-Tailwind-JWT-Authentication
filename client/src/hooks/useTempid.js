@@ -7,6 +7,9 @@ export const useTempid = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  /*
+    * Fetch a new temporary ID from the server
+  */
   const fetchTempId = useCallback(async () => {
     setLoading(true);
     try {
@@ -20,6 +23,7 @@ export const useTempid = () => {
     }
   }, []);
 
+  /* Fetch temp ID on mount */
   useEffect(() => {
     fetchTempId();
   }, [fetchTempId]);

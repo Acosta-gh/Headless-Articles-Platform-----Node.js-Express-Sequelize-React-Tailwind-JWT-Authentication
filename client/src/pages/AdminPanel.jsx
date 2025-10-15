@@ -46,7 +46,6 @@ function AdminPanel() {
   } = useImage();
 
   const [formData, setFormData] = useState({
-    authorId: "",
     title: "",
     content: "",
     tempId: "",
@@ -85,19 +84,18 @@ function AdminPanel() {
     e.preventDefault();
     try {
       const data = new FormData();
-      data.append("authorId", formData.authorId);
       data.append("title", formData.title);
       data.append("content", formData.content);
       data.append("tempId", formData.tempId);
       if (formData.banner) {
         data.append("banner", formData.banner);
       }
+      console.log("Submitting article with data:", formData);
       await createNewArticle(data, tempIdToken);
 
-      toast.success("Artículo creado con éxito");
+      toast.success("Article created successfully");
 
       setFormData({
-        authorId: "",
         title: "",
         content: "",
         tempId: tempId || "",
@@ -111,7 +109,8 @@ function AdminPanel() {
 
       fetchArticles?.();
     } catch (error) {
-      toast.error("Error al crear artículo");
+      console.error("Error creating article:", error);
+      toast.error("Error creating article");
     }
   };
 
@@ -176,20 +175,6 @@ function AdminPanel() {
                 value={formData.title}
                 onChange={handleChange}
                 required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="authorId">ID del autor</Label>
-              <Input
-                id="authorId"
-                type="number"
-                name="authorId"
-                placeholder="ID del autor"
-                value={formData.authorId}
-                onChange={handleChange}
-                required
-                inputMode="numeric"
               />
             </div>
 

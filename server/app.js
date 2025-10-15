@@ -13,10 +13,8 @@ app.use(express.json());
 // Serve static files from the "uploads" directory
 const uploadDir = path.resolve(__dirname, './uploads');
 app.use('/uploads', express.static(uploadDir));
-
 // Use versioned routes
 app.use('/api/v1', routesV1);
-
 // Health check endpoint
 app.get('/', (req, res) => {
   res.send('Server is running');

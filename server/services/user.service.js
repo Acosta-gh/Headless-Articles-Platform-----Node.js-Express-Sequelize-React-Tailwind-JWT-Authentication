@@ -17,9 +17,11 @@ const EMAIL_SECRET_KEY = process.env.EMAIL_SECRET_KEY || "your_email_secret_key"
 const registerUser = async (data) => {
   try {
     const existingUser = await User.findOne({ where: { email: data.email } });
+
     if (existingUser) {
       throw new Error("Email already in use");
     }
+
     const hashedPassword = await bcrypt.hash(data.password, saltRounds);
     const user = await User.create({
       ...data,
@@ -34,7 +36,6 @@ const registerUser = async (data) => {
     });
 
     const emailToken = jwt.sign({ id: user.id }, EMAIL_SECRET_KEY, { expiresIn: "1d" });
-
     const verificationLink = `${process.env.FRONTEND_URL}/verify?token=${emailToken}`;
     const html = verifyEmail(user.name, verificationLink);
     await sendEmail(user.email, "Verify your email", html);
@@ -49,38 +50,44 @@ const registerUser = async (data) => {
 const loginUser = async (data) => {
   try {
     const user = await User.findOne({ where: { email: data.email } });
+
     if (!user) {
-      return null;
-    }
-    const isPasswordValid = await bcrypt.compare(data.password, user.password);
-    if (!isPasswordValid) {
-      return null;
+      return { error: "User not found" }; 
     }
 
-    if(!user.verified) {
-      throw new Error("Email not verified. Please check your inbox.");
+    const isPasswordValid = await bcrypt.compare(data.password, user.password);
+    if (!isPasswordValid) {
+      return { error: "Incorrect password"}; 
     }
-    
+
+    if (!user.verified) {
+      return { error: "Email not verified. Please check your inbox.", user: toSafeUser(user) }; 
+    }
+
     const token = jwt.sign({ id: user.id, admin: user.admin }, jwtSecret, {
       expiresIn: jwtExpiration,
     });
-    
+
     return { user: toSafeUser(user), token };
   } catch (error) {
-    throw new Error("Error logging in user: " + error.message);
+    console.error("Login error:", error);
+    return { error: "Internal server error" };
   }
 };
+
 
 const getAllUsers = async () => {
   try {
     const users = await User.findAll();
-    return users;
+    const safeUsers = users.map(user => toSafeUser(user));
+    return safeUsers;
   } catch (error) {
     throw new Error("Error fetching users: " + error.message);
   }
 };
 
 const getUserById = async (id) => {
+  console.log("Fetching user with ID:", id);
   try {
     const user = await User.findByPk(id);
     if (!user) {

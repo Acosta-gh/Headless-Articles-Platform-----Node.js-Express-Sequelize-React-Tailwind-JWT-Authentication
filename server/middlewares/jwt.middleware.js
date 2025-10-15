@@ -1,7 +1,17 @@
 const jwt = require("jsonwebtoken");
 const { jwtSecret } = require("@/configs/auth");
 
+/**
+ * Middleware to verify JWT token
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ * @returns 
+ */
 function verifyJWT(req, res, next) {
+  console.log("Verifying JWT...");
+  console.log("Headers:", req.headers);
+  console.log("Authorization Header:", req.headers.authorization);
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
@@ -15,12 +25,13 @@ function verifyJWT(req, res, next) {
 
   try {
     const payload = jwt.verify(token, jwtSecret);
-    req.user = payload; 
+    req.user = payload;
+    console.log("JWT verified successfully:", payload);
     next();
   } catch (err) {
+    console.error("JWT verification error:", err);
     return res.status(401).json({ error: "Invalid or expired token." });
   }
-  
 }
 
 module.exports = { verifyJWT };

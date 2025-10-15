@@ -3,7 +3,7 @@ const SECRET = process.env.JWT_SECRET || "your_jwt_secret_key";
 
 function verifyTempIdToken(req, res, next) {
   const tempIdToken = req.headers["x-tempid-token"];
-  const tempId = req.body?.tempId;
+  const tempId = req.body?.tempId || req.query?.tempId;
   
   console.log("Verifying:", tempIdToken);
   console.log("tempId", tempId);

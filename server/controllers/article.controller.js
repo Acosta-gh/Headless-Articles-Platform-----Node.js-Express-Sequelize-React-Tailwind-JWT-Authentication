@@ -2,6 +2,9 @@
 const articleService = require("@/services/article.service");
 
 async function createArticle(req, res) {
+  // Author ID should come from the authenticated user (req.user)
+  const authorId = req.user.id;
+  
   try {
     let bannerPath = null;
 
@@ -12,8 +15,8 @@ async function createArticle(req, res) {
     if (req.file) {
       bannerPath = `/uploads/${req.file.filename}`;
     }
-    
-    const { authorId, title, content, tempId } = req.body;
+
+    const { title, content, tempId } = req.body;
     const article = await articleService.createArticle({
       authorId,
       title,

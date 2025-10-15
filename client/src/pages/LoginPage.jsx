@@ -2,48 +2,67 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link, useNavigate } from "react-router-dom";
-
+import { Spinner } from "@/components/ui/spinner";
 import { useAuth } from "@/hooks/useAuth";
+
+const DEFAULT_LOGO = {
+  url: "https://www.shadcnblocks.com",
+  src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/shadcnblockscom-wordmark.svg",
+  alt: "logo",
+  title: "shadcnblocks.com",
+};
 
 const LoginPage = ({
   heading = "Login",
-  logo = {
-    url: "https://www.shadcnblocks.com",
-    src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/shadcnblockscom-wordmark.svg",
-    alt: "logo",
-    title: "shadcnblocks.com",
-  },
+  logo = DEFAULT_LOGO,
   buttonText = "Login",
   signupText = "Need an account?",
   signupUrl = "/signup",
+  redirectUrl = "/profile",
+
 }) => {
-  const { login } = useAuth();
+  const navigate = useNavigate();
+  const { login, loading } = useAuth();
+  
   const [formData, setFormData] = React.useState({
     email: "",
     password: "",
   });
+
+  /**
+   * Handle input change
+   * @param {Event} e
+   */
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({ ...prevData, [name]: value }));
+    setFormData((prevData) => ({ 
+      ...prevData, 
+      [name]: value 
+    }));
   };
-  const navigate = useNavigate();
 
+  /**
+   * Handle form submission
+   * @param {Event} e
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const data = { ...formData };
+    
+    const result = await login(formData);
 
-    try {
-      await login(data);
-      navigate("/profile");
-    } catch (error) {
-      console.error("Login error:", error);
+    if (!result.success) {
+      return;
     }
+
+    // Navigate to redirect URL
+    navigate(redirectUrl);
   };
+
   return (
     <section className="bg-muted h-screen">
       <div className="flex h-full items-center justify-center">
-        {/* Logo */}
         <div className="flex flex-col items-center gap-6 lg:justify-start">
+          {/* Logo */}
           <a href={logo.url}>
             <img
               src={logo.src}
@@ -52,11 +71,16 @@ const LoginPage = ({
               className="h-10 dark:invert"
             />
           </a>
+
+          {/* Login Form */}
           <form
             onSubmit={handleSubmit}
             className="min-w-sm border-muted bg-background flex w-full max-w-sm flex-col items-center gap-y-4 rounded-md border px-6 py-8 shadow-md"
           >
-            {heading && <h1 className="text-xl font-semibold">{heading}</h1>}
+            {heading && (
+              <h1 className="text-xl font-semibold">{heading}</h1>
+            )}
+
             <Input
               type="email"
               placeholder="Email"
@@ -65,7 +89,9 @@ const LoginPage = ({
               name="email"
               value={formData.email}
               onChange={handleChange}
+              disabled={loading}
             />
+
             <Input
               type="password"
               placeholder="Password"
@@ -74,18 +100,27 @@ const LoginPage = ({
               name="password"
               value={formData.password}
               onChange={handleChange}
+              disabled={loading}
             />
-            <Button type="submit" className="w-full">
-              {buttonText}
+
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={loading}
+            >
+              {loading ? <Spinner className="mr-2" /> : null}
+              {loading ? "Loading..." : buttonText}
             </Button>
           </form>
+
+          {/* Signup Link */}
           <div className="text-muted-foreground flex justify-center gap-1 text-sm">
             <p>{signupText}</p>
             <Link
               to={signupUrl}
               className="text-primary font-medium hover:underline"
             >
-              Sign up
+              Sign Up
             </Link>
           </div>
         </div>

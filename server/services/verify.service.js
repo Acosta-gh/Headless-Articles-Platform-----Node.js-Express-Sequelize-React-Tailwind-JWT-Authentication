@@ -1,6 +1,9 @@
 const jwt = require("jsonwebtoken");
 const { User } = require("@/models/index");
 
+const { verifyEmail } = require("@/utils/templates/verifyEmail"); // Email template
+const { sendEmail } = require("@/utils/emailUtils"); // Email sending utility
+
 const EMAIL_SECRET_KEY = process.env.EMAIL_SECRET_KEY || "your_email_secret_key";
 
 const verifyUserEmail = async (token) => {
@@ -31,6 +34,30 @@ const verifyUserEmail = async (token) => {
   }
 };
 
+const resendVerificationEmail = async (email) => {
+  try {
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    if (user.verified) {
+      return { message: "Email already verified" };
+    }
+
+    const emailToken = jwt.sign({ id: user.id }, EMAIL_SECRET_KEY, { expiresIn: "1d" });
+    const verificationLink = `${process.env.FRONTEND_URL}/verify?token=${emailToken}`;
+    const html = verifyEmail(user.name, verificationLink);
+    await sendEmail(user.email, "Verify your email", html);
+
+    return { message: "Verification email resent successfully" };
+  } catch (error) {
+    console.error("Error resending verification email:", error);
+    throw new Error("Error resending verification email: " + error.message);
+  }
+};
+
 module.exports = {
   verifyUserEmail,
+  resendVerificationEmail,  
 };

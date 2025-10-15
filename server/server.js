@@ -1,17 +1,37 @@
-require('dotenv').config();
-require('module-alias/register')
+require("dotenv").config();
+require("module-alias/register");
 
-const app = require('./app');
-const { connectToDatabase } = require('@/services/database.service');
+const { User } = require("@/models/index"); // Import User model
+
+const app = require("./app");
+const { connectToDatabase } = require("@/services/database.service");
 
 const PORT = process.env.PORT || 3001;
 
 (async () => {
   try {
     await connectToDatabase();
-    app.listen(PORT, () => console.log(`🚀 Server is running at http://localhost:${PORT}`));
+    // Ensure the admin user exists
+    const adminEmail = process.env.ADMIN_EMAIL || "admin@admin.com";
+    const adminPassword = process.env.ADMIN_PASSWORD || "123";
+    const adminUser = await User.findOne({ where: { email: adminEmail } });
+    if (!adminUser) {
+      await User.create({
+        username: "admin",
+        email: adminEmail,
+        password: await require("bcrypt").hash(adminPassword, process.env.SALT_ROUNDS || 10),
+        admin: true,
+        verified: true,
+      });
+      console.log("✅ Admin user created");
+    } else {
+      console.log("ℹ️ Admin user already exists");
+    }
+    app.listen(PORT, () =>
+      console.log(`🚀 Server is running at http://localhost:${PORT}`)
+    );
   } catch (error) {
-    console.error('💥 The server failed to start:', error);
+    console.error("💥 The server failed to start:", error);
     process.exit(1);
   }
 })();

@@ -2,16 +2,20 @@
 const articleService = require("@/services/article.service");
 
 async function createArticle(req, res) {
-  // Author ID should come from the authenticated user (req.user)
   const authorId = req.user.id;
-  
+
+  // Parse categoryIds from request body
+  let categoryIds = [];
+  // If categoryIds is sent as a JSON string, parse it
+  if (req.body.categoryIds) {
+    // Parse the JSON string into an array
+    categoryIds = typeof req.body.categoryIds === 'string'
+      ? JSON.parse(req.body.categoryIds)
+      : req.body.categoryIds;
+  }
+
   try {
     let bannerPath = null;
-
-    console.log("Creating article with file upload");
-    console.log("File:", req.file);
-    console.log("Body:", req.body);
-
     if (req.file) {
       bannerPath = `/uploads/${req.file.filename}`;
     }
@@ -22,7 +26,8 @@ async function createArticle(req, res) {
       title,
       content,
       banner: bannerPath,
-      tempId
+      tempId,
+      categoryIds  
     });
     return res.status(201).json(article);
   } catch (error) {
@@ -32,7 +37,6 @@ async function createArticle(req, res) {
       .json({ error: "Error creating article: " + error.message });
   }
 }
-
 async function getAllArticles(req, res) {
   const articles = await articleService.getAllArticles();
   return res.status(200).json(articles);

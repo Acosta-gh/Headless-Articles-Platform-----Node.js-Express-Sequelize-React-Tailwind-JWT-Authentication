@@ -1,7 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
+
 import { useArticles } from "@/hooks/useArticles";
 import { useImage } from "@/hooks/useImage";
 import { useTempid } from "@/hooks/useTempid";
+import { useCategories } from "@/hooks/useCategories";
+
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,7 +19,6 @@ import {
 } from "@/components/ui/card";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
-
 import { Loader2 } from "lucide-react";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3001";
@@ -45,14 +47,26 @@ function AdminPanel() {
     error: imageError,
   } = useImage();
 
+  const {
+    categories,
+    loading: categoriesLoading,
+    error: categoriesError,
+    addCategory,
+    removeCategory,
+  } = useCategories();
+
   const [formData, setFormData] = useState({
     title: "",
     content: "",
     tempId: "",
     banner: null,
   });
-
   const [imageData, setImageData] = useState(null);
+  const [categoryForm, setCategoryForm] = useState({
+    name: "",
+    description: "",
+  });
+  const [selectedCategories, setSelectedCategories] = useState([]);
 
   // https://bobbyhadz.com/blog/react-reset-file-input
   const bannerInputRef = useRef(null);
@@ -80,6 +94,41 @@ function AdminPanel() {
     }
   };
 
+  const handleCategoryFormChange = (e) => {
+    const { name, value } = e.target;
+    setCategoryForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleCategorySubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await addCategory(categoryForm);
+      setCategoryForm({ name: "", description: "" });
+      toast.success("Categoría creada");
+    } catch (err) {
+      toast.error("Error creando categoría");
+    }
+  };
+
+  const handleDeleteCategory = async (id) => {
+    if (confirm("¿Eliminar esta categoría?")) {
+      try {
+        await removeCategory(id);
+        toast.success("Categoría eliminada");
+      } catch (err) {
+        toast.error("Error eliminando categoría");
+      }
+    }
+  };
+
+  // Manejar el cambio de selección de categorías para el post
+  const handleCategoryCheckbox = (e) => {
+    const value = Number(e.target.value);
+    setSelectedCategories((prev) =>
+      e.target.checked ? [...prev, value] : prev.filter((id) => id !== value)
+    );
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -91,8 +140,10 @@ function AdminPanel() {
         data.append("banner", formData.banner);
       }
       console.log("Submitting article with data:", formData);
-      await createNewArticle(data, tempIdToken);
 
+      data.append("categoryIds", JSON.stringify(selectedCategories));
+
+      await createNewArticle(data, tempIdToken);
       toast.success("Article created successfully");
 
       setFormData({
@@ -101,7 +152,7 @@ function AdminPanel() {
         tempId: tempId || "",
         banner: null,
       });
-
+      setSelectedCategories([]);
       // Limpia el input file del banner
       if (bannerInputRef.current) {
         bannerInputRef.current.value = "";
@@ -135,9 +186,14 @@ function AdminPanel() {
       }
       console.log("Imagen subida:", uploadedImage);
       console.log("URL de la imagen:", uploadedImage.url);
-      setFormData((prevData) => ({ ...prevData, content: prevData.content + `\n![alt text](${BACKEND_URL}${uploadedImage.url})` }));
+      setFormData((prevData) => ({
+        ...prevData,
+        content:
+          prevData.content +
+          `\n![alt text](${BACKEND_URL}${uploadedImage.url})`,
+      }));
     } catch (error) {
-        toast.error("Error al subir imagen");
+      toast.error("Error al subir imagen");
     }
   };
 
@@ -190,6 +246,35 @@ function AdminPanel() {
               />
             </div>
 
+            {/* FORMULARIO DE IMAGEN VISUALMENTE DENTRO */}
+            <div className="border-t pt-4">
+              <div className="space-y-2">
+                <Label htmlFor="image">Subir imagen al contenido</Label>
+                <div className="flex gap-2">
+                  <Input
+                    ref={imageInputRef}
+                    id="image"
+                    type="file"
+                    name="image"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    disabled={isUploadingImage || !imageData}
+                    onClick={handleImageUpload}
+                  >
+                    {isUploadingImage && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+                    Subir
+                  </Button>
+                </div>
+              </div>
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="content">Contenido</Label>
               <Textarea
@@ -203,6 +288,21 @@ function AdminPanel() {
               />
             </div>
 
+            <Label>Categorías</Label>
+
+            <div className="flex flex-wrap gap-2">
+              {categories.map((cat) => (
+                <label key={cat.id} className="flex items-center gap-1">
+                  <input
+                    type="checkbox"
+                    value={cat.id}
+                    checked={selectedCategories.includes(cat.id)}
+                    onChange={handleCategoryCheckbox}
+                  />
+                  {cat.name}
+                </label>
+              ))}
+            </div>
             <CardFooter className="px-0">
               <Button type="submit" disabled={isSubmittingArticle}>
                 {isSubmittingArticle && (
@@ -215,43 +315,58 @@ function AdminPanel() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Subir imagen</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleImageUpload} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="image">Imagen</Label>
-              <Input
-                ref={imageInputRef}
-                id="image"
-                type="file"
-                name="image"
-                accept="image/*"
-                onChange={handleImageChange}
-              />
-            </div>
-            <CardFooter className="px-0">
-              <Button
-                type="submit"
-                variant="secondary"
-                disabled={isUploadingImage}
-              >
-                {isUploadingImage && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
-                Subir imagen
-              </Button>
-            </CardFooter>
-          </form>
-        </CardContent>
-      </Card>
-
       {tempId && (
         <p className="text-sm text-muted-foreground">TempID actual: {tempId}</p>
       )}
 
+      <Card>
+        <CardHeader>
+          <CardTitle>Categorías</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleCategorySubmit} className="space-y-4 mb-4">
+            <div className="space-y-2">
+              <Label htmlFor="cat-name">Nombre</Label>
+              <Input
+                id="cat-name"
+                name="name"
+                value={categoryForm.name}
+                onChange={handleCategoryFormChange}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="cat-desc">Descripción</Label>
+              <Textarea
+                id="cat-desc"
+                name="description"
+                value={categoryForm.description}
+                onChange={handleCategoryFormChange}
+              />
+            </div>
+            <Button type="submit" disabled={categoriesLoading}>
+              Añadir categoría
+            </Button>
+          </form>
+          <ul>
+            {categories.map((cat) => (
+              <li key={cat.id} className="flex items-center gap-2 mb-1">
+                <span className="font-semibold">{cat.name}</span>
+                <span className="text-xs text-muted-foreground">
+                  {cat.description}
+                </span>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={() => handleDeleteCategory(cat.id)}
+                >
+                  Eliminar
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </CardContent>
+      </Card>
       <Separator />
 
       <div className="space-y-3">

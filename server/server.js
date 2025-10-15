@@ -15,11 +15,13 @@ const PORT = process.env.PORT || 3001;
     const adminEmail = process.env.ADMIN_EMAIL || "admin@admin.com";
     const adminPassword = process.env.ADMIN_PASSWORD || "123";
     const adminUser = await User.findOne({ where: { email: adminEmail } });
+    const saltRounds = parseInt(process.env.SALT_ROUNDS, 10) || 10;
+
     if (!adminUser) {
       await User.create({
         username: "admin",
         email: adminEmail,
-        password: await require("bcrypt").hash(adminPassword, process.env.SALT_ROUNDS || 10),
+        password: await require("bcrypt").hash(adminPassword, saltRounds),
         admin: true,
         verified: true,
       });

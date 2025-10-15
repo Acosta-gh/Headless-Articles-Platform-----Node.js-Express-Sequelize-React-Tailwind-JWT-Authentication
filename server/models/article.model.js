@@ -12,6 +12,10 @@ const Article = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    featured:{ // Is the article featured?
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
     banner: { // URL of the banner image
       type: DataTypes.STRING,
       allowNull: true,

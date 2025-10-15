@@ -3,6 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 
+import  Loading  from "@/components/Loading";
+
 import {
   Card,
   CardHeader,
@@ -16,7 +18,7 @@ function Profile() {
   const { isAuthenticated, isAdmin, logout } = useAuth();
   const { profile, loading, error } = useProfile();
   const navigate = useNavigate();
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <Loading />;
   if (error) return <p>Error loading profile</p>;
   if (!profile) return <p>No profile data available</p>;
 

@@ -141,13 +141,14 @@ const getArticleById = async (id) => {
 };
 
 const updateArticle = async (id, data) => {
+  console.log("Updating article with ID:", id, "and data:", data);
   try {
     const article = await Article.findByPk(id);
     if (!article) {
       throw new Error("Article not found");
     }
 
-    const { categoryIds, tempId, ...articleData } = data;
+    const { categoryIds, ...articleData } = data;
 
     await article.update(articleData);
 
@@ -156,11 +157,9 @@ const updateArticle = async (id, data) => {
         const categories = await Category.findAll({ where: { id: categoryIds } });
         await article.setCategories(categories);
       } else {
-        await article.setCategories([]); // Limpia todas si se envía []
+        await article.setCategories([]); 
       }
     }
-
-    await adoptTempImages(tempId, article.id);
 
     return article;
   } catch (error) {

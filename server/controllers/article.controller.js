@@ -9,9 +9,10 @@ async function createArticle(req, res) {
   // If categoryIds is sent as a JSON string, parse it
   if (req.body.categoryIds) {
     // Parse the JSON string into an array
-    categoryIds = typeof req.body.categoryIds === 'string'
-      ? JSON.parse(req.body.categoryIds)
-      : req.body.categoryIds;
+    categoryIds =
+      typeof req.body.categoryIds === "string"
+        ? JSON.parse(req.body.categoryIds)
+        : req.body.categoryIds;
   }
 
   try {
@@ -27,7 +28,7 @@ async function createArticle(req, res) {
       content,
       banner: bannerPath,
       tempId,
-      categoryIds  
+      categoryIds,
     });
     return res.status(201).json(article);
   } catch (error) {
@@ -49,9 +50,49 @@ async function getArticleById(req, res) {
 }
 
 async function updateArticle(req, res) {
-  const article = await articleService.updateArticle(req.params.id, req.body);
-  if (!article) return res.status(404).json({ error: "Article not found" });
-  return res.status(200).json(article);
+  console.log("Updating article with req.body:", req.body);
+  console.log("Updating article with req.file:", req.file);
+  try {
+    const authorId = req.user.id;
+
+    const { title, content, categoryIds, featured } = req.body;
+
+    // Convert featured to boolean
+    const isFeatured = featured === "true" || featured === true;
+
+    // Parse categoryIds
+    const parsedCategoryIds =
+      typeof categoryIds === "string" ? JSON.parse(categoryIds) : categoryIds;
+
+    let bannerPath = null;
+    if (req.file) {
+      bannerPath = `/uploads/${req.file.filename}`;
+    } else if (req.body.existingBanner) {
+      bannerPath = req.body.existingBanner;
+    }
+
+    const article = await articleService.updateArticle(req.params.id, {
+      authorId,
+      title,
+      content,
+      banner: bannerPath,
+      featured: isFeatured,
+      categoryIds: parsedCategoryIds,
+    });
+
+    if (!article) {
+      return res.status(404).json({ error: "Article not found" });
+    }
+
+    return res.status(200).json(article);
+  } catch (error) {
+    console.error("Error updating article:", error);
+    if (!res.headersSent) {
+      return res
+        .status(500)
+        .json({ error: "Error updating article: " + error.message });
+    }
+  }
 }
 
 async function deleteArticle(req, res) {

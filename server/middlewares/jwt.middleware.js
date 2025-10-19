@@ -27,6 +27,7 @@ function verifyJWT(req, res, next) {
     const payload = jwt.verify(token, jwtSecret);
     req.user = payload;
     console.log("JWT verified successfully:", payload);
+    console.log("User ID from token:", payload.id);
     next();
   } catch (err) {
     console.error("JWT verification error:", err);

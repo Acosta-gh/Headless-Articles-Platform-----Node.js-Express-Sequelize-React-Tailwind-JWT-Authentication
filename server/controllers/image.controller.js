@@ -11,23 +11,32 @@ async function getAllImages(req, res) {
 
 async function createImage(req, res) {
   try {
-    console.log("File:", req.file);
-    console.log("Body:", req.body);
+    console.log("Creating image with req.file:", req.file);
+    console.log("Creating image with req.body:", req.body);
 
     if (!req.file) {
       return res.status(400).json({ error: "No image file uploaded" });
     }
 
-    const { tempId } = req.body;
-    if (!tempId) {
-      return res.status(400).json({ error: "Missing tempId" });
+    let { tempId, articleId } = req.body;
+
+    // If we are creating a new image, either tempId or articleId must be provided
+    if (!tempId && !articleId) {
+      return res.status(400).json({ error: "Missing tempId and articleId" });
+    }
+
+    // If articleId is provided, we don't need tempId
+    if (articleId) {
+      tempId = null;
     }
 
     const fileName = req.file.filename || req.file.path.split("/").pop();
     const imageUrl = `/uploads/${fileName}`;
 
+    // Create the image record
     const image = await imageService.createImage({
       tempId,
+      articleId,
       url: imageUrl,
     });
 
@@ -37,7 +46,6 @@ async function createImage(req, res) {
     return res.status(500).json({ error: error.message });
   }
 }
-
 
 module.exports = {
   createImage,

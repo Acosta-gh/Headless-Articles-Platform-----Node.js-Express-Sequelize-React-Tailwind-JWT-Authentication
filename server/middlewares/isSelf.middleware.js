@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const { jwtSecret } = require("@/configs/auth");
 
-// Middleware para asegurarse de que el usuario autenticado es el dueño del recurso
+// Middleware to check if the user is accessing their own data
 function isSelf(req, res, next) {
   const authHeader = req.headers['authorization'];
   console.log("Authorization Header:", authHeader);

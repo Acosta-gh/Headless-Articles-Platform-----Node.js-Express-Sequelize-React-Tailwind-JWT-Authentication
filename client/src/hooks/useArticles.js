@@ -4,7 +4,7 @@ import {
   getArticleById,
   createArticle,
   updateArticle,
-  deleteArticle,
+  deleteArticle as deleteArticleService,
 } from "@/services/article.services";
 import { useAuth } from "@/hooks/useAuth";
 import { jwtDecode } from "jwt-decode";
@@ -59,6 +59,47 @@ export const useArticles = () => {
     }
   };
 
+  const deleteArticle = async (id) => {
+    setLoading(true);
+    try {
+      await deleteArticleService(id, token);
+      setArticles((prevArticles) =>
+        prevArticles.filter((article) => article.id !== id)
+      );
+      toast.success("Article deleted successfully");
+    } catch (error) {
+      setError(error);
+      toast.error("Failed to delete article");
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateExistingArticle = async (id, articleData, tempIdToken) => {
+    setLoading(true);
+    try {
+      console.log(
+        "Updating article with data:",
+        articleData,
+        "and tempIdToken:",
+        tempIdToken
+      );
+      const updatedArticle = await updateArticle(id, articleData, tempIdToken, token);
+      setArticles((prevArticles) =>
+        prevArticles.map((article) =>
+          article.id === id ? updatedArticle : article
+        )
+      );
+      return updatedArticle;
+    } catch (error) {
+      setError(error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   /*
    * Fetch articles on mount
    */
@@ -72,5 +113,7 @@ export const useArticles = () => {
     error,
     fetchArticles,
     createNewArticle,
+    updateExistingArticle,
+    deleteArticle,
   };
 };

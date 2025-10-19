@@ -1,7 +1,7 @@
 import axios from "axios";
 
 let API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001/api/v1/";
-const ARTICLES_URL = API_URL + "article/";
+const ARTICLES_URL = API_URL + "article";
 
 /**
  * Fetch all articles
@@ -46,8 +46,13 @@ export const createArticle = async (articleData, tempIdToken, token) => {
  * @returns {Promise<Object>} Updated article data
  * @throws {Error} Network or server error
  */
-export const updateArticle = async (id, articleData) => {
-  const response = await axios.put(`${ARTICLES_URL}/${id}`, articleData);
+export const updateArticle = async (id, articleData, tempIdToken, token) => {
+  const response = await axios.put(`${ARTICLES_URL}/${id}`, articleData, {
+    headers: {
+       Authorization: `Bearer ${token}`,
+      "x-tempid-token": tempIdToken,
+    },
+  });
   return response.data;
 };
 
@@ -56,7 +61,11 @@ export const updateArticle = async (id, articleData) => {
  * @returns {Promise<Object>} Deletion result
  * @throws {Error} Network or server error
  */
-export const deleteArticle = async (id) => {
-  const response = await axios.delete(`${ARTICLES_URL}/${id}`);
+export const deleteArticle = async (id,token) => {
+  const response = await axios.delete(`${ARTICLES_URL}/${id}`,{
+    headers: {  
+      Authorization: `Bearer ${token}`,
+    },
+  });
   return response.data;
 };

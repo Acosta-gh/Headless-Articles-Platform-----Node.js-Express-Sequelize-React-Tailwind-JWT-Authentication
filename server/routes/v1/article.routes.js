@@ -35,9 +35,17 @@ router.get("/", getAllArticles);
 router.get("/:id", getArticleById);
 
 // Update a specific article by ID
-router.put("/:id", updateArticle);
+router.put(
+  "/:id",
+  verifyJWT,
+  isAdmin,
+  upload.single("banner"),
+  multerErrorHandler,
+  verifyTempIdToken,
+  updateArticle
+);
 
 // Delete a specific article by ID
-router.delete("/:id", deleteArticle);
+router.delete("/:id", verifyJWT, isAdmin, deleteArticle);
 
 module.exports = router;

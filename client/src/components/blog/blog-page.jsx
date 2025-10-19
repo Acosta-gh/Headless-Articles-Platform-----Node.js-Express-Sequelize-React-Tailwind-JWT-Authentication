@@ -4,97 +4,143 @@ import { Button } from "@/components/ui/button";
 import { BlogPostCard } from "@/components/blog/blog-post-card";
 import { FeaturedPostSidebarItem } from "@/components/blog/featured-post-sidebar-item";
 
+import { useArticles } from "@/hooks/useArticles";
+import { BACKEND_URL } from "@/components/constants";
+import { ArrowRight } from "lucide-react";
+
 const BlogPage = () => {
+  const { articles } = useArticles();
+
+  const featuredArticles = articles.filter((article) => article.featured);
+  const mainFeaturedArticle = featuredArticles[0];
+  const otherFeaturedArticles = featuredArticles.slice(1, 5);
+  const recentArticles = articles
+    .filter((article) => !article.featured)
+    .slice(0, 3);
+
+  if (!articles || articles.length === 0) {
+    return (
+      <div className="container mx-auto px-4 py-8 md:px-6 lg:px-8">
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <h2 className="text-2xl font-bold mb-2">No Articles Available</h2>
+          <p className="text-muted-foreground">
+            Articles will appear here once they are published.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 py-8 md:px-6 lg:px-8">
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-        <div className="relative h-[400px] overflow-hidden rounded-lg shadow-lg md:h-[500px] lg:col-span-2">
-          <img
-            src="https://placehold.co/600x400?text=."
-            alt="Unlocking Business Efficiency with SaaS Solutions"
-            className="w-full object-cover"
-          />
-          <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/70 to-transparent p-6 text-white">
-            <Badge className="mb-2 w-fit bg-white/20 text-white backdrop-blur-sm">
-              Business
-            </Badge>
-            <h2 className="text-2xl leading-tight font-bold md:text-3xl">
-              Unlocking Business Efficiency with SaaS Solutions
-            </h2>
+      {/* Main Featured Article */}
+      {mainFeaturedArticle && (
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 mb-12">
+          {/* Large Featured Post */}
+          <div className="relative h-[400px] overflow-hidden rounded-lg shadow-lg md:h-[500px] lg:col-span-2 group cursor-pointer">
+            {mainFeaturedArticle.banner ? (
+              <img
+                src={`${BACKEND_URL}${mainFeaturedArticle.banner}`}
+                alt={mainFeaturedArticle.title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-muted to-muted-foreground/20 flex items-center justify-center">
+                <span className="text-muted-foreground">Sin imagen</span>
+              </div>
+            )}
+            <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/70 via-black/30 to-transparent p-6 text-white">
+              {mainFeaturedArticle.categories.length > 0 && (
+                <Badge className="mb-2 w-fit bg-white/20 text-white backdrop-blur-sm hover:bg-white/30 transition-colors">
+                  {mainFeaturedArticle.categories[0]?.name || "Destacado"}
+                </Badge>
+              )}
+              <h2 className="text-2xl leading-tight font-bold md:text-3xl mb-2">
+                {mainFeaturedArticle.title}
+              </h2>
+              <p className="text-sm text-white/80">
+                Por <span className="font-semibold">{mainFeaturedArticle.author?.username}</span> • {new Date(mainFeaturedArticle.createdAt).toLocaleDateString('es-ES')}
+              </p>
+            </div>
           </div>
-        </div>
 
-        {/* Other Featured Posts Sidebar */}
-        <div className="bg-card text-card-foreground space-y-6 rounded-lg border p-6 lg:col-span-1">
-          <h3 className="text-xl font-semibold">Other featured posts</h3>
-          <div className="space-y-4">
-            <FeaturedPostSidebarItem
-              imageSrc="https://placehold.co/600x400?text=."
-              imageAlt="Revolutionizing industries through SaaS implementation"
-              title="Revolutionizing industries through SaaS implementation"
-            />
-            <FeaturedPostSidebarItem
-              imageSrc="https://placehold.co/600x400?text=."
-              imageAlt="Synergizing saas and UX design for elevating digital experiences"
-              title="Synergizing saas and UX design for elevating digital experiences"
-            />
-            <FeaturedPostSidebarItem
-              imageSrc="https://placehold.co/600x400?text=."
-              imageAlt="Navigating saas waters with intuitive UI and UX"
-              title="Navigating saas waters with intuitive UI and UX"
-            />
-            <FeaturedPostSidebarItem
-              imageSrc="https://placehold.co/600x400?text=."
-              imageAlt="Sculpting saas success - the art of UI and UX design"
-              title="Sculpting saas success - the art of UI and UX design"
-            />
-            <FeaturedPostSidebarItem
-              imageSrc="https://placehold.co/600x400?text=."
-              imageAlt="Transforming saas platforms - a UI/UX design odyssey"
-              title="Transforming saas platforms - a UI/UX design odyssey"
-            />
+          {/* Other Featured Posts Sidebar */}
+          <div className="bg-card text-card-foreground space-y-6 rounded-lg border p-6 lg:col-span-1 h-fit sticky top-4">
+            <h3 className="text-xl font-semibold">Other Featured Articles</h3>
+            <div className="space-y-4">
+              {otherFeaturedArticles.length > 0 ? (
+                otherFeaturedArticles.map((article) => (
+                  <FeaturedPostSidebarItem
+                    key={article.id}
+                    imageSrc={
+                      article.banner
+                        ? `${BACKEND_URL}${article.banner}`
+                        : "/placeholder.svg?height=80&width=80"
+                    }
+                    imageAlt={article.title}
+                    title={article.title}
+                    author={article.author?.username}
+                    date={new Date(article.createdAt).toLocaleDateString('es-ES')}
+                  />
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  There are no other featured articles.
+                </p>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Recent Posts Section */}
-      <div className="mt-12">
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-2xl font-bold">Recent Posts</h2>
-          <Button variant="outline" asChild>
-            <a href="#">All Posts</a>
-          </Button>
+      {recentArticles.length > 0 && (
+        <div className="mt-12">
+          <div className="mb-6 flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold">Recent Articles</h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Discover our latest posts
+              </p>
+            </div>
+            <Button variant="outline" className="gap-2">
+              View All Articles
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {recentArticles.map((article) => (
+              <BlogPostCard
+                key={article.id}
+                imageSrc={
+                  article.banner
+                    ? `${BACKEND_URL}${article.banner}`
+                    : "/placeholder.svg?height=400&width=600"
+                }
+                imageAlt={article.title}
+                title={article.title}
+                description={
+                  article.content
+                    .replace(/!\[.*?\]\(.*?\)/g, "") // Elimina imágenes markdown
+                    .replace(/[\r\n]+/g, " ") // Elimina saltos de línea
+                    .substring(0, 150) + "..." // Primeros 150 caracteres
+                }
+                authorName={article.author?.username}
+                authorAvatarSrc="/placeholder.svg?height=24&width=24"
+                readTime={`${Math.ceil(article.content.split(" ").length / 200)} min`}
+                date={new Date(article.createdAt).toLocaleDateString('es-ES')}
+              />
+            ))}
+          </div>
         </div>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <BlogPostCard
-            imageSrc="https://placehold.co/600x400?text=."
-            imageAlt="Mastering UI Elements: A Practical Guide for Designers"
-            title="Mastering UI Elements: A Practical Guide for Designers"
-            description="Dive into the world of user interfaces with our expert guides, latest trends, and practical tips."
-            authorName="Jennifer Taylor"
-            authorAvatarSrc="/placeholder.svg?height=24&width=24"
-            readTime="3 min"
-          />
-          <BlogPostCard
-            imageSrc="https://placehold.co/600x400?text=."
-            imageAlt="Crafting Seamless Experiences: The Art of Intuitive UI Design"
-            title="Crafting Seamless Experiences: The Art of Intuitive UI Design"
-            description="Explore the principles and techniques that drive user-centric UI design, ensuring a seamless and intuitive experience for your audience."
-            authorName="Jennifer Taylor"
-            authorAvatarSrc="/placeholder.svg?height=24&width=24"
-            readTime="5 min"
-          />
-          <BlogPostCard
-            imageSrc="https://placehold.co/600x400?text=."
-            imageAlt="Beyond Aesthetics: The Power of Emotional UX Design"
-            title="Beyond Aesthetics: The Power of Emotional UX Design"
-            description="Delve into the realm of emotional design and discover how incorporating empathy and psychological insights can elevate user experiences."
-            authorName="Ryan A."
-            authorAvatarSrc="/placeholder.svg?height=24&width=24"
-            readTime="2 min"
-          />
+      )}
+
+      {/* Empty state for recent posts */}
+      {recentArticles.length === 0 && !mainFeaturedArticle && (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">No hay artículos recientes</p>
         </div>
-      </div>
+      )}
     </div>
   );
 };

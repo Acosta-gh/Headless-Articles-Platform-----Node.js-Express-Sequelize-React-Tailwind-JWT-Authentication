@@ -103,7 +103,7 @@ const router = createBrowserRouter([
       </Suspense>
     ),
   },
-  {
+  { 
     path: "*",
     element: (
       <Suspense fallback={<Loading />}>

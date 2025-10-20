@@ -9,6 +9,19 @@ const createCategory = async (data) => {
   }
 };
 
+const updateCategory = async (id, data) => {
+  try {
+    const category = await Category.findByPk(id);
+    if (!category) {
+      throw new Error("Category not found");
+    }
+    await category.update(data);
+    return category;
+  } catch (error) {
+    throw new Error("Error updating category: " + error.message);
+  }
+};
+
 const deleteCategory = async (id) => {
   try {
     const category = await Category.findByPk(id);
@@ -48,4 +61,5 @@ module.exports = {
   deleteCategory,
   getAllCategories,
   getCategoryById,
-};  
+  updateCategory,
+};

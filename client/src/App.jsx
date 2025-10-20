@@ -19,6 +19,7 @@ const SignUpPage = lazy(() => import("./pages/SignUpPage"));
 const Profile = lazy(() => import("./pages/Profile"));
 const Loading = lazy(() => import("./components/Loading.jsx"));
 const Verify = lazy(() => import("./pages/Verify"));
+const ArticlePage = lazy(() => import("./pages/Article"));
 
 // 🔐 Componente para proteger rutas
 function ProtectedRoute({ children, requireAdmin = false }) {
@@ -65,6 +66,14 @@ const router = createBrowserRouter([
               <Profile />
             </Suspense>
           </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/article/:id",
+        element: (
+          <Suspense fallback={<Loading />}>
+            <ArticlePage />
+          </Suspense>
         ),
       },
       {

@@ -54,6 +54,7 @@ function AdminPanel() {
     error: categoriesError,
     addCategory,
     removeCategory,
+    updateCategoryData,
   } = useCategories();
 
   // Form state
@@ -107,12 +108,48 @@ function AdminPanel() {
     }
   };
 
+  // Cancel editing article
+  const cancelEditArticle = () => {
+    setIsEditing(false);
+    setEditingArticleId(null);
+    setFormData({
+      title: "",
+      content: "",
+      tempId: tempId || "",
+      banner: null,
+      featured: false,
+    });
+    setSelectedCategories([]);
+    if (bannerInputRef.current) {
+      bannerInputRef.current.value = "";
+    }
+    toast.info("Article editing cancelled");
+  };
+
   // Handle image file selection
   const handleImageChange = (e) => {
     const { files } = e.target;
     if (files && files[0]) {
       setImageData(files[0]);
     }
+  };
+
+  const handleEditCategory = (category) => {
+    if (!category) {
+      toast.info("Category editing cancelled");
+      setIsEditingCategory(false);
+      setCategoryForm({ id: null, name: "", description: "" });
+      return;
+    }
+    toast.info(
+      `Category "${category.name}" loaded for editing (ID: ${category.id})`
+    );
+    setIsEditingCategory(true);
+    setCategoryForm({
+      id: category.id,
+      name: category.name,
+      description: category.description,
+    });
   };
 
   // Category form handlers
@@ -130,6 +167,20 @@ function AdminPanel() {
       toast.success("Categoría creada");
     } catch (err) {
       toast.error("Error creando categoría");
+    }
+  };
+
+  // Handle category editing
+  const handleEditCategorySubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await updateCategoryData(categoryForm);
+      setCategoryForm({ name: "", description: "", id: null });
+      setIsEditingCategory(false);
+      toast.success("Category updated");
+    } catch (err) {
+      toast.error("Error updating category");
+      console.error(err);
     }
   };
 
@@ -210,7 +261,7 @@ function AdminPanel() {
       if (isEditing) {
         data.append("articleId", editingArticleId);
       }
-      
+
       const uploadedImage = await uploadNewImage(data, tempIdToken);
 
       toast.success("Image uploaded successfully");
@@ -257,7 +308,6 @@ function AdminPanel() {
     }
   };
 
-
   const handleSubmitEdit = async (e) => {
     e.preventDefault();
 
@@ -271,7 +321,7 @@ function AdminPanel() {
     data.append("tempId", formData.tempId);
     data.append("featured", formData.featured ? "true" : "false");
     data.append("articleId", editingArticleId);
-    
+
     console.log("featured value:", formData.featured);
     console.log("featured is boolean:", typeof formData.featured === "boolean");
 
@@ -324,6 +374,7 @@ function AdminPanel() {
   const isUploadingImage = imageLoading || tempIdLoading;
 
   const [isEditing, setIsEditing] = useState(false);
+  const [isEditingCategory, setIsEditingCategory] = useState(false);
   const [editingArticleId, setEditingArticleId] = useState(null);
 
   return (
@@ -338,46 +389,36 @@ function AdminPanel() {
         imageError={imageError}
       />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Create Article</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ArticleForm
-            formData={formData}
-            onChange={handleChange}
-            bannerInputRef={bannerInputRef}
-            imageInputRef={imageInputRef}
-            handleImageChange={handleImageChange}
-            handleImageUpload={handleImageUpload}
-            imageData={imageData}
-            isUploadingImage={isUploadingImage}
-            handleSubmit={handleSubmit}
-            isSubmittingArticle={isSubmittingArticle}
-            categories={categories}
-            selectedCategories={selectedCategories}
-            handleCategoryCheckbox={handleCategoryCheckbox}
-            isEditing={isEditing}
-            handleSubmitEdit={handleSubmitEdit}
-          />
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Categories</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <CategoryManager
-            categoryForm={categoryForm}
-            onCategoryFormChange={handleCategoryFormChange}
-            onCategorySubmit={handleCategorySubmit}
-            categories={categories}
-            categoriesLoading={categoriesLoading}
-            onDeleteCategory={handleDeleteCategory}
-          />
-        </CardContent>
-      </Card>
+      <ArticleForm
+        formData={formData}
+        onChange={handleChange}
+        bannerInputRef={bannerInputRef}
+        imageInputRef={imageInputRef}
+        handleImageChange={handleImageChange}
+        handleImageUpload={handleImageUpload}
+        imageData={imageData}
+        isUploadingImage={isUploadingImage}
+        handleSubmit={handleSubmit}
+        isSubmittingArticle={isSubmittingArticle}
+        categories={categories}
+        selectedCategories={selectedCategories}
+        handleCategoryCheckbox={handleCategoryCheckbox}
+        isEditing={isEditing}
+        cancelEditArticle={cancelEditArticle}
+        handleSubmitEdit={handleSubmitEdit}
+      />
+      <Separator />
+      <CategoryManager
+        categoryForm={categoryForm}
+        onCategoryFormChange={handleCategoryFormChange}
+        onCategorySubmit={handleCategorySubmit}
+        onEditCategory={handleEditCategory}
+        categories={categories}
+        categoriesLoading={categoriesLoading}
+        onDeleteCategory={handleDeleteCategory}
+        isEditingCategory={isEditingCategory}
+        onEditCategorySubmit={handleEditCategorySubmit}
+      />
 
       <Separator />
 

@@ -33,6 +33,20 @@ export const useArticles = () => {
     }
   }, []);
 
+
+  const getArticle = async (id) => {
+    setLoading(true);
+    try {
+      const article = await getArticleById(id);
+      return article;
+    } catch (error) {
+      setError(error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   /*
     * Create a new article
     @param {Object} articleData - Data for the new article
@@ -115,5 +129,6 @@ export const useArticles = () => {
     createNewArticle,
     updateExistingArticle,
     deleteArticle,
+    getArticle
   };
 };

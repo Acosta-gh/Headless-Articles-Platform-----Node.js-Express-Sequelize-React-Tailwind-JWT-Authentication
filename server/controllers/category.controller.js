@@ -48,9 +48,28 @@ async function deleteCategory(req, res) {
   }
 }
 
+async function updateCategory(req, res) {
+  try {
+    const updatedCategory = await categoryService.updateCategory(
+      req.params.id,
+      req.body
+    );
+    if (!updatedCategory)
+      return res.status(404).json({ error: "Category not found" });
+    return res.status(200).json(updatedCategory);
+  } catch (error) {
+    console.error("Error updating category:", error);
+    return res
+      .status(500)
+      .json({ error: "Error updating category: " + error.message });
+  }
+} 
+
+
 module.exports = {
   createCategory,
   getAllCategories,
   getCategoryById,
   deleteCategory,
+  updateCategory
 };

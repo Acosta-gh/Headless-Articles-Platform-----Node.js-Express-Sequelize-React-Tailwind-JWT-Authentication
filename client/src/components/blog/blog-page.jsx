@@ -8,6 +8,8 @@ import { useArticles } from "@/hooks/useArticles";
 import { BACKEND_URL } from "@/components/constants";
 import { ArrowRight } from "lucide-react";
 
+import { Link } from "react-router-dom";
+
 const BlogPage = () => {
   const { articles } = useArticles();
 
@@ -37,18 +39,22 @@ const BlogPage = () => {
       {mainFeaturedArticle && (
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 mb-12">
           {/* Large Featured Post */}
-          <div className="relative h-[400px] overflow-hidden rounded-lg shadow-lg md:h-[500px] lg:col-span-2 group cursor-pointer">
+
+          <Link to={`/article/${mainFeaturedArticle.id}`} className="relative h-[400px] overflow-hidden rounded-lg shadow-lg md:h-[500px] lg:col-span-2 group cursor-pointer">
             {mainFeaturedArticle.banner ? (
-              <img
-                src={`${BACKEND_URL}${mainFeaturedArticle.banner}`}
-                alt={mainFeaturedArticle.title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              />
+         
+                <img
+                  src={`${BACKEND_URL}${mainFeaturedArticle.banner}`}
+                  alt={mainFeaturedArticle.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+              
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-muted to-muted-foreground/20 flex items-center justify-center">
                 <span className="text-muted-foreground">Sin imagen</span>
               </div>
             )}
+            <Link />
             <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/70 via-black/30 to-transparent p-6 text-white">
               {mainFeaturedArticle.categories.length > 0 && (
                 <Badge className="mb-2 w-fit bg-white/20 text-white backdrop-blur-sm hover:bg-white/30 transition-colors">
@@ -59,10 +65,17 @@ const BlogPage = () => {
                 {mainFeaturedArticle.title}
               </h2>
               <p className="text-sm text-white/80">
-                Por <span className="font-semibold">{mainFeaturedArticle.author?.username}</span> • {new Date(mainFeaturedArticle.createdAt).toLocaleDateString('es-ES')}
+                Por{" "}
+                <span className="font-semibold">
+                  {mainFeaturedArticle.author?.username}
+                </span>{" "}
+                •{" "}
+                {new Date(mainFeaturedArticle.createdAt).toLocaleDateString(
+                  "es-ES"
+                )}
               </p>
             </div>
-          </div>
+          </Link>
 
           {/* Other Featured Posts Sidebar */}
           <div className="bg-card text-card-foreground space-y-6 rounded-lg border p-6 lg:col-span-1 h-fit sticky top-4">
@@ -80,7 +93,10 @@ const BlogPage = () => {
                     imageAlt={article.title}
                     title={article.title}
                     author={article.author?.username}
-                    date={new Date(article.createdAt).toLocaleDateString('es-ES')}
+                    date={new Date(article.createdAt).toLocaleDateString(
+                      "es-ES"
+                    )}
+                    articleId={article.id}
                   />
                 ))
               ) : (
@@ -127,8 +143,11 @@ const BlogPage = () => {
                 }
                 authorName={article.author?.username}
                 authorAvatarSrc="/placeholder.svg?height=24&width=24"
-                readTime={`${Math.ceil(article.content.split(" ").length / 200)} min`}
-                date={new Date(article.createdAt).toLocaleDateString('es-ES')}
+                readTime={`${Math.ceil(
+                  article.content.split(" ").length / 200
+                )} min`}
+                date={new Date(article.createdAt).toLocaleDateString("es-ES")}
+                articleId={article.id}
               />
             ))}
           </div>

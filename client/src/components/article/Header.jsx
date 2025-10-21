@@ -3,10 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 
-export const Header = ({ category, title, author, publishedDate, onBack }) => {
+export const Header = ({ categories = [], title, author, publishedDate, onBack }) => {
   return (
     <header className="space-y-6">
-      <Badge variant="outline">{category}</Badge>
+      {categories.map((cat) => (
+        <Badge key={cat.id} className="bg-accent text-accent-foreground mr-2">
+          {cat.name}
+        </Badge>  
+      ))}
 
       <h1 className="text-foreground text-4xl leading-15 font-bold tracking-tight md:text-4xl lg:text-5xl">
         {title}
@@ -15,11 +19,11 @@ export const Header = ({ category, title, author, publishedDate, onBack }) => {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center space-x-4">
           <Avatar className="h-12 w-12">
-            <AvatarImage src={author.avatar} alt={author.name} className="object-cover" />
-            <AvatarFallback>{author.name.charAt(0)}</AvatarFallback>
+            <AvatarImage src={author.avatar} alt={author} className="object-cover" />
+            <AvatarFallback>{author}</AvatarFallback>
           </Avatar>
           <div>
-            <p className="font-medium">by {author.name}</p>
+            <p className="font-medium">by {author}</p>
             <p className="text-muted-foreground text-sm">{publishedDate}</p>
           </div>
         </div>

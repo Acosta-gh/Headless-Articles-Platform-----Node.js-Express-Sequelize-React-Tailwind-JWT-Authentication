@@ -1,4 +1,4 @@
-const { Comment } = require("@/models/index");
+const { Comment, User } = require("@/models/index");
 
 const createComment = async (data) => {
   try {
@@ -34,6 +34,22 @@ const getCommentById = async (id) => {
   }
 };
 
+const getAllCommentsByArticleId = async (articleId) => {
+  try {
+    const comments = await Comment.findAll({
+      where: { articleId },
+      include: {
+        model: User,
+        as: "user",
+        attributes: ["id", "username", "email"],
+      },
+    });
+    return comments;
+  } catch (error) {
+    throw new Error("Error fetching comments: " + error.message);
+  }
+};
+
 const getAllComments = async () => {
   try {
     const comments = await Comment.findAll();
@@ -48,4 +64,5 @@ module.exports = {
   deleteComment,
   getAllComments,
   getCommentById,
+  getAllCommentsByArticleId,
 };

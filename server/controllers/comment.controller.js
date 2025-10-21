@@ -22,10 +22,15 @@ async function getCommentById(req, res) {
   return res.status(200).json(comment);
 }
 
+async function getAllCommentsByArticleId(req, res) {
+  const comments = await commentsService.getAllCommentsByArticleId(req.query.articleId);
+  return res.status(200).json(comments);
+}
 
 module.exports = {
   createComment,
   deleteComment,
   getAllComments,
   getCommentById,
+  getAllCommentsByArticleId,
 };

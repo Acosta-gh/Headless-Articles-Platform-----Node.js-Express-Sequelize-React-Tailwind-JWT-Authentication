@@ -1,5 +1,12 @@
+"use client";
+
+import React from "react";
+import ReactMarkdown from "react-markdown";
+import rehypeSanitize from "rehype-sanitize";
+
 export const Content = ({ content, coverImage }) => {
   return (
+    console.log("Cover Image URL:", coverImage),
     <article className="space-y-8">
       {coverImage && (
         <div className="bg-muted aspect-video w-full overflow-hidden rounded-xl">
@@ -12,11 +19,18 @@ export const Content = ({ content, coverImage }) => {
       )}
 
       <div className="prose prose-lg max-w-none">
-        {content.map((paragraph, index) => (
-          <p key={index} className="text-blog-content mb-6 leading-relaxed">
-            {paragraph}
-          </p>
-        ))}
+        <ReactMarkdown
+          rehypePlugins={[rehypeSanitize]}
+          components={{
+            img: ({ node, ...props }) => (
+              <div className="flex justify-center my-4">
+                <img {...props} className="max-w-full h-auto rounded-xl" />
+              </div>
+            ),
+          }}
+        >
+          {content}
+        </ReactMarkdown>
       </div>
     </article>
   );

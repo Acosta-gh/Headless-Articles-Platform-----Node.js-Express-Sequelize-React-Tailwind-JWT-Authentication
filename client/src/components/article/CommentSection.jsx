@@ -4,7 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Heart, MessageCircle, Send } from "lucide-react";
 
-export const CommentSection = ({ comments, onAddComment }) => {
+export const CommentSection = ({ comments = [], onAddComment }) => {
   const [newComment, setNewComment] = useState("");
 
   const handleSubmit = (e) => {
@@ -26,7 +26,8 @@ export const CommentSection = ({ comments, onAddComment }) => {
         {/* Comment Form */}
         <form
           onSubmit={handleSubmit}
-          className="bg-card border-blog-border mb-12 rounded-xl border p-6">
+          className="bg-card border-blog-border mb-12 rounded-xl border p-6"
+        >
           <div className="space-y-4">
             <Textarea
               placeholder="Share your thoughts..."
@@ -47,33 +48,50 @@ export const CommentSection = ({ comments, onAddComment }) => {
         <div className="space-y-6">
           {comments.map((comment) => (
             <div
-              key={comment.id}
-              className="bg-card border-blog-border hover:bg-blog-hover rounded-xl border p-6 transition-colors">
+              key={comment.user.username}
+              className="bg-card border-blog-border hover:bg-blog-hover rounded-xl border p-6 transition-colors"
+            >
               <div className="flex items-start space-x-4">
                 <Avatar className="h-10 w-10">
-                  <AvatarImage src={comment.author.avatar} alt={comment.author.name} />
-                  <AvatarFallback>{comment.author.name.charAt(0)}</AvatarFallback>
+                  <AvatarImage
+                    src={comment.user.username}
+                    alt={comment.user.username}
+                  />
+                  <AvatarFallback>
+                    {comment.user.username.charAt(0)}
+                  </AvatarFallback>
                 </Avatar>
 
                 <div className="flex-1 space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-foreground font-medium">{comment.author.name}</p>
-                      <p className="text-blog-meta text-sm">{comment.timestamp}</p>
+                      <p className="text-foreground font-medium">
+                        {comment.user.username}
+                      </p>
+                      <p className="text-blog-meta text-sm">
+                        {comment.timestamp}
+                      </p>
                     </div>
                   </div>
 
-                  <p className="text-blog-content leading-relaxed">{comment.content}</p>
+                  <p className="text-blog-content leading-relaxed">
+                    {comment.content}
+                  </p>
 
                   <div className="flex items-center gap-4">
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-blog-meta hover:text-primary gap-2">
+                      className="text-blog-meta hover:text-primary gap-2"
+                    >
                       <Heart className="h-4 w-4" />
                       {comment.likes}
                     </Button>
-                    <Button variant="ghost" size="sm" className="text-blog-meta hover:text-primary">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-blog-meta hover:text-primary"
+                    >
                       Reply
                     </Button>
                   </div>

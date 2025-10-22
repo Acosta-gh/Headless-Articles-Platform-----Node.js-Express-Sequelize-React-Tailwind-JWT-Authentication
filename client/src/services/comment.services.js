@@ -8,20 +8,24 @@ export const getComments = async (commentId) => {
 };
 
 export const createComment = async (commentData, token) => {
-    const response = await axios.post(COMMENT_URL, commentData, {
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
-    });
-    return response.data;
+  const response = await axios.post(COMMENT_URL, commentData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.data;
 };
 
-export const deleteComment = async (commentId) => {
-  await axios.delete(`${COMMENT_URL}/${commentId}`);
-};  
+export const deleteComment = async (commentId, token) => {
+  await axios.delete(`${COMMENT_URL}/${commentId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
 
 export const getAllCommentsByArticleId = async (articleId) => {
   const response = await axios.get(COMMENT_URL, { params: { articleId } });
   console.log("Response data in getAllCommentsByArticleId:", response.data);
   return response.data;
-}
+};

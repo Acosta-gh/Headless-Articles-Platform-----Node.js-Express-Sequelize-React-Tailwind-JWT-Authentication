@@ -2,13 +2,15 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Heart, MessageCircle, Send } from "lucide-react";
+import { Heart, MessageCircle, Send, Trash } from "lucide-react";
 
 export const CommentSection = ({
   comments = [],
   onAddComment,
   onAddReply,
   onAddLike,
+  onDeleteComment,
+  onDeleteReply,
   currentUserId,
   likesLoading = false,
 }) => {
@@ -48,6 +50,10 @@ export const CommentSection = ({
     }
   };
 
+  const handleDeleteComment = (commentId) => {
+    onDeleteComment(commentId);
+  };
+
   useEffect(() => {
     if (replyingTo === null) {
       setNewReply("");
@@ -61,6 +67,11 @@ export const CommentSection = ({
       typeof id === "object" ? id.userId : id
     );
     return likeIdNumbers.includes(currentUserId);
+  };
+
+  const userHasCommented = (commentUserId) => {
+    if (!currentUserId || !commentUserId) return false;
+    return commentUserId === currentUserId;
   };
 
   return (
@@ -109,18 +120,34 @@ export const CommentSection = ({
                       alt={comment.user.username}
                     />
                     <AvatarFallback>
-                      {comment.user.username.charAt(0)}
+                      {comment.user?.username?.charAt(0)?.toUpperCase() || "?"}
                     </AvatarFallback>
                   </Avatar>
 
                   <div className="flex-1 space-y-3">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-medium">{comment.user.username}</p>
+                        <p className="font-medium">
+                          {userHasCommented(comment.user.id)
+                            ? "You"
+                            : comment.user?.username}
+                        </p>
                         <p className="text-blog-meta text-sm">
                           {new Date(comment.createdAt).toLocaleString()}
                         </p>
                       </div>
+                      {userHasCommented(comment.user.id) && (
+                        <span className="text-sm font-medium text-primary">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-blog-meta hover:text-primary cursor-pointer"
+                            onClick={() => handleDeleteComment(comment)}
+                          >
+                            <Trash className="h-4 w-4" />
+                          </Button>
+                        </span>
+                      )}
                     </div>
 
                     <p className="text-blog-content leading-relaxed">
@@ -179,21 +206,45 @@ export const CommentSection = ({
                           <div className="flex items-start space-x-4">
                             <Avatar className="h-8 w-8">
                               <AvatarImage
-                                src={reply.user.username}
-                                alt={reply.user.username}
+                                src={reply.user?.username}
+                                alt={
+                                  comment.user?.username
+                                    ?.charAt(0)
+                                    ?.toUpperCase() || "?"
+                                }
                               />
                               <AvatarFallback>
-                                {reply.user.username.charAt(0)}
+                                {reply.user?.username
+                                  ?.charAt(0)
+                                  ?.toUpperCase() || "?"}
                               </AvatarFallback>
                             </Avatar>
+
                             <div className="flex-1 space-y-1">
-                              <p className="">{reply.user.username}</p>
+                              <p className="">
+                                {" "}
+                                {userHasCommented(comment.user.id)
+                                  ? "You"
+                                  : comment.user?.username}
+                              </p>
                               <p className="text">
                                 {" "}
                                 {new Date(reply.createdAt).toLocaleString()}
                               </p>
                               <p className="">{reply.content}</p>
                             </div>
+                            {userHasCommented(comment.user.id) && (
+                              <span className="text-sm font-medium text-primary">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="text-blog-meta hover:text-primary cursor-pointer"
+                                  onClick={() => onDeleteReply(reply)}
+                                >
+                                  <Trash className="h-4 w-4" />
+                                </Button>
+                              </span>
+                            )}
                           </div>
                         </div>
                       ))}

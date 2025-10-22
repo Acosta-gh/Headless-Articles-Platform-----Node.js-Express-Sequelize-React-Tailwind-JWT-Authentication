@@ -28,7 +28,7 @@ export const useComments = () => {
         likeIds: c.likeIds || [],
         likeCount: c.likeCount || 0,
       }));
-      
+
       setComments(normalized);
     } catch (err) {
       setError(err);
@@ -75,7 +75,7 @@ export const useComments = () => {
         setComments((prevComments) => [normalizedNewComment, ...prevComments]);
       }
 
-      if(commentData.commentId) {
+      if (commentData.commentId) {
         toast.success("Reply added successfully.");
       } else {
         toast.success("Comment added successfully.");
@@ -102,7 +102,7 @@ export const useComments = () => {
             likeIds: likeData.likeIds || [],
           };
         }
-        
+
         // También actualizar replies
         if (c.replies && c.replies.length > 0) {
           return {
@@ -118,17 +118,40 @@ export const useComments = () => {
             ),
           };
         }
-        
+
         return c;
       })
     );
   };
 
-  const removeComment = async (commentId) => {
+  const removeComment = async (comment) => {
     setLoading(true);
     try {
-      await deleteComment(commentId);
-      setComments((prev) => prev.filter((c) => c.id !== commentId));
+      await deleteComment(comment.id, token);
+
+      if (comment.commentId) {
+        // Es una reply
+        setComments((prev) =>
+          prev.map((c) => {
+            if (c.id === comment.commentId) {
+              return {
+                ...c,
+                replies: c.replies.filter((r) => r.id !== comment.id),
+              };
+            }
+            return c;
+          })
+        );
+        toast.success("Reply deleted successfully");
+        setLoading(false);
+        return;
+      } else {
+        // Es un comentario principal
+        setComments((prev) => prev.filter((c) => c.id !== comment.id));
+        toast.success("Comment deleted successfully");
+      }
+
+      setComments((prev) => prev.filter((c) => c.id !== comment.id));
     } catch (err) {
       setError(err);
       throw err;

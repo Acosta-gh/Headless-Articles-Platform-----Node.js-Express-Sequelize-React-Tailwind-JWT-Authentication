@@ -26,6 +26,7 @@ export default function Article() {
     addComment,
     fetchAllCommentsByArticleId,
     updateCommentLikes,
+    removeComment
   } = useComments();
 
   const {
@@ -163,6 +164,8 @@ export default function Article() {
             onAddComment={handleAddComment}
             onAddReply={handleAddReply}
             onAddLike={handleAddLikeToComment}
+            onDeleteComment={removeComment}
+            onDeleteReply={removeComment}
             currentUserId={userId}
             likesLoading={likesLoading}
           />

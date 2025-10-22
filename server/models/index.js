@@ -35,6 +35,9 @@
   Bookmark.belongsTo(User, { foreignKey: 'userId', as: 'user' });
   User.hasMany(Bookmark, { foreignKey: 'userId', as: 'bookmarks' });
 
+  Like.belongsTo(Comment, { foreignKey: 'commentId', as: 'comment' });
+  Comment.hasMany(Like, { foreignKey: 'commentId', as: 'likes' });
+
   Article.belongsToMany(Category, { 
     through: 'ArticleCategories', // Intermediate table
     foreignKey: 'articleId',      // Key pointing to Article

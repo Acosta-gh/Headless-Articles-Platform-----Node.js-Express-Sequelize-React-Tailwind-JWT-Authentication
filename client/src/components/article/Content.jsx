@@ -6,7 +6,7 @@ import rehypeSanitize from "rehype-sanitize";
 
 export const Content = ({ content, coverImage }) => {
   return (
-    console.log("Cover Image URL:", coverImage),
+    //console.log("Cover Image URL:", coverImage),
     <article className="space-y-8">
       {coverImage && (
         <div className="bg-muted aspect-video w-full overflow-hidden rounded-xl">

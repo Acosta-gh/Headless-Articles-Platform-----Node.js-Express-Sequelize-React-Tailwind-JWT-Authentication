@@ -1,7 +1,8 @@
 const commentsService = require('@/services/comment.service');
 
 async function createComment(req, res) {
-  const comment = await commentsService.createComment(req.body);
+  console.log("Creating comment with data:", req.body, "for user:", req.user);
+  const comment = await commentsService.createComment(req.body, req.user.id);
   return res.status(201).json(comment);
 }
 

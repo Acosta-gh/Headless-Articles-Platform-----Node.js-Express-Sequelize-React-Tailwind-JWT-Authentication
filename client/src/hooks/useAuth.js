@@ -12,6 +12,8 @@ const TOKEN_KEY = "token";
 const RESEND_STORAGE_KEY = "resend_cooldowns";
 const RESEND_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutos
 
+
+
 /**
  * Get token from localStorage
  * @returns {string|null}
@@ -26,6 +28,23 @@ function getToken() {
  */
 function setToken(token) {
   localStorage.setItem(TOKEN_KEY, token);
+}
+
+/**
+ * Get user ID from token 
+ * @returns {string|null} user ID from token
+ */
+function getUserId(){
+  const token = getToken();
+  if (!token) return null;
+
+  try {
+    const decoded = jwtDecode(token);
+    return decoded.id || null;
+  } catch (error) {
+    console.error("Error decoding token for user ID:", error);
+    return null;
+  }
 }
 
 /**
@@ -338,6 +357,7 @@ export function useAuth() {
     isAuthenticated,
     isAdmin,
     loading,
+    userId: getUserId(),
     token: getToken(),
   };
 }

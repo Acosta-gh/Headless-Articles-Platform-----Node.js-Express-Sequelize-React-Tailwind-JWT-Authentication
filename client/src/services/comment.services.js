@@ -7,9 +7,13 @@ export const getComments = async (commentId) => {
   return response.data;
 };
 
-export const createComment = async (commentData) => {
-  const response = await axios.post(COMMENT_URL, commentData);
-  return response.data;
+export const createComment = async (commentData, token) => {
+    const response = await axios.post(COMMENT_URL, commentData, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+    return response.data;
 };
 
 export const deleteComment = async (commentId) => {

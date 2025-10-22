@@ -6,7 +6,11 @@ const Like = sequelize.define(
   {
     articleId: { // Which article is liked
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
+    },
+    commentId: { // Which comment is liked
+      type: DataTypes.INTEGER,
+      allowNull: true,
     },
     userId: { // Who liked the article
       type: DataTypes.INTEGER,

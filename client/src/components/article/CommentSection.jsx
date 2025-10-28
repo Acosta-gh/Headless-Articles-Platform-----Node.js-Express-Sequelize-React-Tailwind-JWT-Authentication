@@ -1,10 +1,13 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Heart, MessageCircle, Send, Trash } from "lucide-react";
+import { toast } from "sonner";
 
-export const CommentSection = ({
+function CommentSection({
   comments = [],
   onAddComment,
   onAddReply,
@@ -13,7 +16,8 @@ export const CommentSection = ({
   onDeleteReply,
   currentUserId,
   likesLoading = false,
-}) => {
+  isLiking,
+}) {
   const [newComment, setNewComment] = useState("");
   const [replyingTo, setReplyingTo] = useState(null);
   const [newReply, setNewReply] = useState("");
@@ -23,56 +27,47 @@ export const CommentSection = ({
     setReplyingTo((prev) => (prev === commentId ? null : commentId));
   };
 
-  //console.log("comments in CommentSection:", comments);
-
   const handleSubmit = (e) => {
     e.preventDefault();
     if (newComment.trim()) {
-      onAddComment(newComment);
+      onAddComment(newComment.trim());
       setNewComment("");
     }
   };
 
   const handleSubmitReply = (e) => {
     e.preventDefault();
-    /*
-    console.log(
-      "Submitting reply to comment ID:",
-      replyingTo,
-      "with content:",
-      newReply
-    );
-    */
-    if (newReply.trim()) {
-      onAddReply(newReply, replyingTo);
+    if (newReply.trim() && replyingTo != null) {
+      onAddReply(newReply.trim(), replyingTo);
       setReplyingTo(null);
       setNewReply("");
     }
   };
 
-  const handleDeleteComment = (commentId) => {
-    onDeleteComment(commentId);
-  };
+  const handleDeleteComment = (comment) => onDeleteComment(comment);
 
   useEffect(() => {
-    if (replyingTo === null) {
-      setNewReply("");
-    }
+    if (replyingTo === null) setNewReply("");
   }, [replyingTo]);
+
+  const normalizeIds = (ids) =>
+    (ids ?? []).map((id) => {
+      const val = typeof id === "object" ? id?.userId ?? id?.id ?? id : id;
+      return String(val);
+    });
 
   const userHasLiked = (likeIds) => {
     if (!currentUserId || !likeIds || likeIds.length === 0) return false;
-
-    const likeIdNumbers = likeIds.map((id) =>
-      typeof id === "object" ? id.userId : id
-    );
-    return likeIdNumbers.includes(currentUserId);
+    return normalizeIds(likeIds).includes(String(currentUserId));
   };
 
-  const userHasCommented = (commentUserId) => {
-    if (!currentUserId || !commentUserId) return false;
-    return commentUserId === currentUserId;
-  };
+  const isOwner = (authorId) =>
+    currentUserId && authorId
+      ? String(authorId) === String(currentUserId)
+      : false;
+
+  const usernameInitial = (username) =>
+    username?.charAt(0)?.toUpperCase() || "?";
 
   return (
     <section className="space-y-6">
@@ -111,24 +106,25 @@ export const CommentSection = ({
             return (
               <div
                 key={comment.id}
-                className="bg-card border-blog-border hover:bg-blog-hover rounded-xl border p-6 transition-colors"
+                className="bg-card border-blog-border hover:bg-blog-hover rounded-xl border p-6 transition-colors  overflow-hidden"
               >
+                {/* Comment */}
                 <div className="flex items-start space-x-4">
-                  <Avatar className="h-10 w-10">
+                  <Avatar className="h-10 w-10 outline flex-shrink-0">
                     <AvatarImage
-                      src={comment.user.username}
-                      alt={comment.user.username}
+                      src={`https://api.dicebear.com/9.x/notionists-neutral/svg?seed=${comment.user?.username}`}
+                      alt={comment.user?.username || "User"}
                     />
                     <AvatarFallback>
-                      {comment.user?.username?.charAt(0)?.toUpperCase() || "?"}
+                      {usernameInitial(comment.user?.username)}
                     </AvatarFallback>
                   </Avatar>
 
-                  <div className="flex-1 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">
-                          {userHasCommented(comment.user.id)
+                  <div className="flex-1 min-w-0 space-y-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="font-medium truncate">
+                          {isOwner(comment.user?.id)
                             ? "You"
                             : comment.user?.username}
                         </p>
@@ -136,8 +132,8 @@ export const CommentSection = ({
                           {new Date(comment.createdAt).toLocaleString()}
                         </p>
                       </div>
-                      {userHasCommented(comment.user.id) && (
-                        <span className="text-sm font-medium text-primary">
+                      {isOwner(comment.user?.id) && (
+                        <span className="text-sm font-medium text-primary flex-shrink-0">
                           <Button
                             variant="ghost"
                             size="icon"
@@ -150,7 +146,7 @@ export const CommentSection = ({
                       )}
                     </div>
 
-                    <p className="text-blog-content leading-relaxed">
+                    <p className="text-blog-content leading-relaxed break-words whitespace-pre-wrap">
                       {comment.content}
                     </p>
 
@@ -158,13 +154,18 @@ export const CommentSection = ({
                       <Button
                         variant="ghost"
                         size="sm"
-                        className={`gap-2 transition-colors ${
+                        className={`gap-2 transition-colors cursor-pointer ${
                           liked
                             ? "text-red-500 hover:text-red-600"
                             : "text-blog-meta hover:text-primary"
                         }`}
-                        onClick={() => onAddLike({ commentId: comment.id })}
-                        disabled={likesLoading}
+                        onClick={() => {
+                          if (!isLiking) {
+                            onAddLike(comment.id);
+                          } else {
+                            toast.error("Please wait, processing your like.");
+                          }
+                        }}
                       >
                         <Heart
                           className="h-4 w-4"
@@ -175,79 +176,114 @@ export const CommentSection = ({
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-blog-meta hover:text-primary"
+                        className="text-blog-meta hover:text-primary cursor-pointer"
                         onClick={() => handleSetReplyingTo(comment.id)}
                       >
                         {replyingTo === comment.id ? "Cancel" : "Reply"}
                       </Button>
                     </div>
+
                     {replyingTo === comment.id && (
                       <form onSubmit={handleSubmitReply} className="mt-4">
                         <Textarea
-                          placeholder={`Reply to ${comment.user.username}...`}
+                          placeholder={`Reply to ${comment.user?.username}...`}
                           value={newReply}
                           onChange={(e) => setNewReply(e.target.value)}
                           className="border-blog-border focus:border-primary min-h-[80px] resize-none"
                         />
                         <div className="flex justify-end mt-2">
-                          <Button type="submit" className="gap-2">
+                          <Button
+                            type="submit"
+                            className="gap-2 cursor-pointer"
+                          >
                             <Send className="h-4 w-4" />
                             Post Reply
                           </Button>
                         </div>
                       </form>
                     )}
-                    {comment.replies &&
-                      comment.replies.map((reply) => (
+
+                    {/* Replies */}
+                    {comment.replies?.map((reply) => {
+                      const replyLiked = userHasLiked(reply.likeIds);
+                      return (
                         <div
                           key={reply.id}
-                          className="ml-10 mt-4 border-l pl-4"
+                          className="ml-0 pl-2.5 lg:ml-10 lg:pl-4 mt-4 border-l  overflow-hidden"
                         >
-                          <div className="flex items-start space-x-4">
-                            <Avatar className="h-8 w-8">
+                          <div className="flex items-start space-x-4 min-w-0">
+                            <Avatar className="h-8 w-8 outline flex-shrink-0">
                               <AvatarImage
-                                src={reply.user?.username}
-                                alt={
-                                  comment.user?.username
-                                    ?.charAt(0)
-                                    ?.toUpperCase() || "?"
-                                }
+                                src={`https://api.dicebear.com/9.x/notionists-neutral/svg?seed=${reply.user?.username}`}
+                                alt={reply.user?.username || "User"}
                               />
                               <AvatarFallback>
-                                {reply.user?.username
-                                  ?.charAt(0)
-                                  ?.toUpperCase() || "?"}
+                                {usernameInitial(reply.user?.username)}
                               </AvatarFallback>
                             </Avatar>
 
-                            <div className="flex-1 space-y-1">
-                              <p className="">
-                                {" "}
-                                {userHasCommented(comment.user.id)
-                                  ? "You"
-                                  : comment.user?.username}
+                            <div className="flex-1 min-w-0 space-y-1">
+                              <div className="flex items-center justify-between gap-2  w-full">
+                                <div className="min-w-0">
+                                  <p className="font-medium truncate">
+                                    {isOwner(reply.user?.id)
+                                      ? "You"
+                                      : reply.user?.username}
+                                  </p>
+                                  <p className="text-blog-meta text-sm">
+                                    {new Date(reply.createdAt).toLocaleString()}
+                                  </p>
+                                </div>
+                                {isOwner(reply.user?.id) && (
+                                  <span className="text-sm font-medium text-primary flex-shrink-0">
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="text-blog-meta hover:text-primary cursor-pointer"
+                                      onClick={() => onDeleteReply(reply)}
+                                    >
+                                      <Trash className="h-4 w-4" />
+                                    </Button>
+                                  </span>
+                                )}
+                              </div>
+
+                              <p className="text-blog-content leading-relaxed break-words whitespace-pre-wrap ">
+                                {reply.content}
                               </p>
-                              <p className="text">
-                                {" "}
-                                {new Date(reply.createdAt).toLocaleString()}
-                              </p>
-                              <p className="">{reply.content}</p>
-                            </div>
-                            {userHasCommented(comment.user.id) && (
-                              <span className="text-sm font-medium text-primary">
+
+                              <div className="flex items-center gap-0">
                                 <Button
                                   variant="ghost"
-                                  size="icon"
-                                  className="text-blog-meta hover:text-primary cursor-pointer"
-                                  onClick={() => onDeleteReply(reply)}
+                                  size="sm"
+                                  className={`gap-2 transition-colors cursor-pointer ${
+                                    replyLiked
+                                      ? "text-red-500 hover:text-red-600"
+                                      : "text-blog-meta hover:text-primary"
+                                  }`}
+                                  onClick={() => {
+                                    if (!isLiking) {
+                                      onAddLike(reply.id);
+                                    } else {
+                                      toast.error(
+                                        "Please wait, processing your like."
+                                      );
+                                    }
+                                  }}
+                                  disabled={likesLoading}
                                 >
-                                  <Trash className="h-4 w-4" />
+                                  <Heart
+                                    className="h-4 w-4"
+                                    fill={replyLiked ? "currentColor" : "none"}
+                                  />
+                                  {reply.likeCount || 0}
                                 </Button>
-                              </span>
-                            )}
+                              </div>
+                            </div>
                           </div>
                         </div>
-                      ))}
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -257,4 +293,6 @@ export const CommentSection = ({
       </div>
     </section>
   );
-};
+}
+
+export default CommentSection;

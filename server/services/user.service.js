@@ -1,16 +1,15 @@
-// services/user.service.js
-const { User } = require("@/models/index"); // Import User model
+const { User } = require("@/models/index"); 
 
-const { toSafeUser } = require("@/utils/toSafeUser"); // Exclude sensitive info
+const { toSafeUser } = require("@/utils/toSafeUser"); 
 
-const saltRounds = parseInt(process.env.SALT_ROUNDS, 10) || 10; // For bcrypt
-const bcrypt = require("bcrypt"); // Hash passwords
+const saltRounds = parseInt(process.env.SALT_ROUNDS, 10) || 10; 
+const bcrypt = require("bcrypt"); 
 
-const { jwtSecret, jwtExpiration } = require("@/configs/auth"); // JWT config
-const jwt = require("jsonwebtoken"); // JWT handling
+const { jwtSecret, jwtExpiration } = require("@/configs/auth"); 
+const jwt = require("jsonwebtoken"); 
 
-const { verifyEmail } = require("@/utils/templates/verifyEmail"); // Email template
-const { sendEmail } = require("@/utils/emailUtils"); // Email sending utility
+const { verifyEmail } = require("@/utils/templates/verifyEmail");
+const { sendEmail } = require("@/utils/emailUtils");
 
 const EMAIL_SECRET_KEY = process.env.EMAIL_SECRET_KEY || "your_email_secret_key";
 

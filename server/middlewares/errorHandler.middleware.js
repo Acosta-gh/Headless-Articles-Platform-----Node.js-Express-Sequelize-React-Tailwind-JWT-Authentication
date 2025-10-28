@@ -1,3 +1,9 @@
+/*
+* ========================================================================================
+* ⚠️ This file's code was generated partially or completely by a Large Language Model (LLM).
+* ========================================================================================
+*/
+
 module.exports = (err, req, res, next) => {
   // Ensure err is an object
   if (!err || typeof err !== 'object') {

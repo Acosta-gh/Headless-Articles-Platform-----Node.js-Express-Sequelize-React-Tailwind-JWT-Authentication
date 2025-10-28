@@ -1,9 +1,10 @@
 import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Clock } from "lucide-react";
+import { Clock , Heart} from "lucide-react";
 import { Link } from "react-router-dom";
-export function BlogPostCard({
+
+function ArticleCard({
   imageSrc,
   imageAlt,
   title,
@@ -11,6 +12,7 @@ export function BlogPostCard({
   authorName,
   authorAvatarSrc,
   readTime,
+  likeCount,
   category,
   articleId,
 }) {
@@ -75,6 +77,10 @@ export function BlogPostCard({
               </div>
             </div>
             <div className="flex items-center gap-1 text-xs text-muted-foreground whitespace-nowrap">
+              <Heart className="h-3.5 w-3.5 relative bottom-[0.0005rem]" />
+              {likeCount}
+            </div>
+            <div className="flex items-center gap-1 text-xs text-muted-foreground whitespace-nowrap">
               <Clock className="h-3.5 w-3.5" />
               {readTime}
             </div>
@@ -84,3 +90,5 @@ export function BlogPostCard({
     </div>
   );
 }
+
+export default ArticleCard;

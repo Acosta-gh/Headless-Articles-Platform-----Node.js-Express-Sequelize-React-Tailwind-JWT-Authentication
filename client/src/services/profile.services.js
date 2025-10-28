@@ -25,8 +25,14 @@ export const getProfile = async (userId, token) => {
  * @returns {Promise<Object>} Updated user profile data
  * @throws {Error} Network or server error
  */
-export const updateUserProfile = async (userId, profileData) => {
-  const response = await axios.put(`${USER_URL}/${userId}`, profileData);
+export const updateUserProfile = async (userId, profileData, token) => {
+  const response = await axios.put(`${USER_URL}/${userId}`, profileData,
+    {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    }
+  );
   return response.data;
 };
 

@@ -1,7 +1,7 @@
 import React from "react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
-export default function ErrorAlert({ tempIdError, articleError, imageError }) {
+function ErrorAlert({ tempIdError, articleError, imageError }) {
   if (!tempIdError && !articleError && !imageError) return null;
 
   return (
@@ -15,3 +15,5 @@ export default function ErrorAlert({ tempIdError, articleError, imageError }) {
     </Alert>
   );
 }
+
+export default ErrorAlert;

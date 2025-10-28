@@ -1,6 +1,3 @@
-const jwt = require("jsonwebtoken");
-const { jwtSecret } = require("@/configs/auth");
-
 function isAdmin(req, res, next) {
   if (!req.user || !req.user.admin) {
     return res.status(403).json({ error: "Admin privileges required." });

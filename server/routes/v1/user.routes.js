@@ -1,7 +1,14 @@
-// routes/v1/user.routes.js
 const express = require("express");
 const router = express.Router();
 
+// ======================================================================
+//                        🧑 User Model
+// ======================================================================
+const { User } = require("../../models/index");
+
+// ======================================================================
+//                      🧑 User Controllers
+// ======================================================================
 const {
   registerUser,
   loginUser,
@@ -11,14 +18,45 @@ const {
   updateUser,
 } = require("@/controllers/user.controller");
 
-const { isSelf } = require("@/middlewares/isSelf.middleware");
+// ======================================================================
+//            🔐 Authentication & Authorization Middlewares
+// ======================================================================
+const { authorizeOwner } = require("@/middlewares/authorizeOwner.middleware");
 const { isAdmin } = require("@/middlewares/isAdmin.middleware");
+const { verifyJWT } = require("@/middlewares/verifyJWT.middleware");
+const { genericLimiter } = require("@/middlewares/rateLimit.middleware");
 
+// ======================================================================
+//                      🧑 User Routes
+// ======================================================================
+
+// Create a new user (registration)
 router.post("/register", registerUser);
+// User login
 router.post("/login", loginUser);
+// Get all users (admin only)
 router.get("/", isAdmin, getAllUsers);
-router.get("/:id", isSelf, getUserById);
-router.put("/:id", isSelf, updateUser);
-router.delete("/:id", isSelf, deleteUser);
+// Get, update, and delete a specific user by ID (owner only)
+router.get(
+  "/:id",
+  verifyJWT,
+  genericLimiter,
+  authorizeOwner(async (req) => User.findByPk(req.params.id)),
+  getUserById
+);
+// Update a specific user by ID
+router.put(
+  "/:id",
+  verifyJWT,
+  authorizeOwner(async (req) => User.findByPk(req.params.id)),
+  updateUser
+);
+// Delete a specific user by ID
+router.delete(
+  "/:id",
+  verifyJWT,
+  authorizeOwner(async (req) => User.findByPk(req.params.id)),
+  deleteUser
+);
 
 module.exports = router;

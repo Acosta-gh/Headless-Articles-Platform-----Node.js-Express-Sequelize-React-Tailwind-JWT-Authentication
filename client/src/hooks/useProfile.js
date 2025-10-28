@@ -1,7 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
-import { getProfile as getProfileService } from "@/services/profile.services";
+import {
+  getProfile as getProfileService,
+  updateUserProfile as updateUserProfileService,
+} from "@/services/profile.services";
 import { useAuth } from "@/hooks/useAuth";
 import { jwtDecode } from "jwt-decode";
+
+import { toast } from "sonner";
 
 export const useProfile = () => {
   const { token, isAuthenticated } = useAuth();
@@ -9,6 +14,9 @@ export const useProfile = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  /* 
+  * Fetch user profile data
+  */
   const fetchProfile = useCallback(async () => {
     if (!token) return;
     setLoading(true);
@@ -20,11 +28,43 @@ export const useProfile = () => {
       const userProfile = await getProfileService(decoded.id, token);
       setProfile(userProfile);
     } catch (error) {
-      setError(error);
+      console.error("Error fetching profile:", error);
+      if (error.response && error.response.status === 429) {
+        setError(new Error("Rate limit exceeded. Please try again later."));
+        toast.error("Rate limit exceeded. Please try again later.");
+      } else {
+        setError(error);
+      }
     } finally {
       setLoading(false);
     }
   }, [token]);
+
+  /* 
+  * Update user profile data
+  @param {Object} profileData - Updated profile data
+  */
+  const updateProfile = useCallback(
+    async (profileData) => {
+      if (!token || !profile) return;
+      setLoading(true);
+      try {
+        const updatedProfile = await updateUserProfileService(
+          profile.id,
+          profileData,
+          token
+        );
+        setProfile(updatedProfile);
+        return updatedProfile;
+      } catch (error) {
+        setError(error);
+        throw error;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [token, profile]
+  );
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -36,6 +76,8 @@ export const useProfile = () => {
 
   return {
     profile,
+    setProfile,
+    updateProfile,
     loading,
     error,
   };

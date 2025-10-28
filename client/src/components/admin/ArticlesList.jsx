@@ -9,8 +9,15 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { BACKEND_URL } from "@/components/constants";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { BACKEND_URL } from "@/components/Constants";
+import { Link } from "react-router-dom";
+
 import {
   Edit2,
   Trash2,
@@ -18,10 +25,12 @@ import {
   Calendar,
   User,
   Star,
+  Eye,
 } from "lucide-react";
 
-export default function ArticlesList({
+function ArticlesList({
   articles,
+  articlesAmount,
   setEditingArticle,
   handleDeleteArticle,
 }) {
@@ -47,7 +56,7 @@ export default function ArticlesList({
         <div>
           <h2 className="text-lg font-semibold tracking-tight">Articles</h2>
           <p className="text-sm text-muted-foreground">
-            Manage your published articles ({articles.length})
+            Manage your published articles ({articlesAmount})
           </p>
         </div>
       </div>
@@ -82,7 +91,9 @@ export default function ArticlesList({
                             Featured
                           </Badge>
                         </TooltipTrigger>
-                        <TooltipContent>This article is featured</TooltipContent>
+                        <TooltipContent>
+                          This article is featured
+                        </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
                   )}
@@ -163,7 +174,7 @@ export default function ArticlesList({
                     <TooltipTrigger asChild>
                       <Button
                         onClick={() => setEditingArticle(article)}
-                        className="flex-1 gap-1.5"
+                        className="flex-1 gap-1.5 cursor-pointer"
                         variant="default"
                         size="sm"
                       >
@@ -173,12 +184,27 @@ export default function ArticlesList({
                     </TooltipTrigger>
                     <TooltipContent>Edit this article</TooltipContent>
                   </Tooltip>
-
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        asChild
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 gap-1.5"
+                      >
+                        <Link to={`/article/${article.id}`}>
+                          <Eye className="h-3.5 w-3.5" />
+                          <span className="hidden sm:inline">View</span>
+                        </Link>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>View article on site</TooltipContent>
+                  </Tooltip>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
                         onClick={() => handleDeleteArticle(article.id)}
-                        className="flex-1 gap-1.5"
+                        className="flex-1 gap-1.5 cursor-pointer"
                         variant="destructive"
                         size="sm"
                       >
@@ -197,3 +223,5 @@ export default function ArticlesList({
     </div>
   );
 }
+
+export default ArticlesList;

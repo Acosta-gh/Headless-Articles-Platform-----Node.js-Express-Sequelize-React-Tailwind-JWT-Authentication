@@ -7,7 +7,11 @@ const TEMPID_URL = API_URL + "tempid/";
  * @returns {Promise<Object>} Object containing tempId and tempIdToken
  * @throws {Error} Network or server error
  */
-export const generateTempId = async () => { 
-  const response = await axios.get(TEMPID_URL);
+export const generateTempId = async (token) => { 
+  const response = await axios.get(TEMPID_URL,{
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
   return response.data;
 };

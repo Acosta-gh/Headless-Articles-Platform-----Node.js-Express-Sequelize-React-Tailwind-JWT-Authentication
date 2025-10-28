@@ -1,3 +1,9 @@
+/*
+* ========================================================================================
+* ⚠️ This file's code was generated partially or completely by a Large Language Model (LLM).
+* ========================================================================================
+*/
+
 import axios from "axios";
 
 let API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001/api/v1/";

@@ -1,10 +1,19 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
-const { verifyJWT } = require("@/middlewares/jwt.middleware");
-const { createLike } = require('@/controllers/like.controller');
+// ======================================================================
+//               🔐 Authentication Middleware
+// ======================================================================
+const { verifyJWT } = require("@/middlewares/verifyJWT.middleware");
+const { createLike } = require("@/controllers/like.controller");
+const { genericLimiter } = require("@/middlewares/rateLimit.middleware");
 
-// Create and undo a like for a comment or article
-router.post('/', verifyJWT, createLike);
+// ======================================================================
+//                      ❤️ Like Routes
+// ======================================================================
+/*
+* Create a new like for a comment or article
+*/
+router.post("/", verifyJWT, genericLimiter, createLike);
 
 module.exports = router;

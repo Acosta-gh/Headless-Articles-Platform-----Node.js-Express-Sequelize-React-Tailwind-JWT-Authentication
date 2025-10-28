@@ -1,3 +1,9 @@
+/*
+ * ========================================================================================
+ * ⚠️ This file's code was generated partially or completely by a Large Language Model (LLM).
+ * ========================================================================================
+ */
+
 import React, { useEffect, useRef, useState } from "react";
 
 // Hooks
@@ -13,14 +19,20 @@ import { toast } from "sonner";
 // Components
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import PaginationControls from "@/components/common/PaginationControls";
+
 import ErrorAlert from "@/components/admin/ErrorAlert";
 import ArticleForm from "@/components/admin/ArticleForm";
 import CategoryManager from "@/components/admin/CategoryManager";
 import ArticlesList from "@/components/admin/ArticlesList";
 
-import { BACKEND_URL } from "@/components/constants";
+import { BACKEND_URL } from "@/components/Constants";
+import { Fade } from "react-awesome-reveal";
 
 function AdminPanel() {
+  // -------------------
+  //      🎣 Hooks
+  // -------------------
   const { token, isAuthenticated } = useAuth();
 
   const {
@@ -57,6 +69,9 @@ function AdminPanel() {
     updateCategoryData,
   } = useCategories();
 
+  // -------------------
+  //      📦 State
+  // -------------------
   // Form state
   const [formData, setFormData] = useState({
     title: "",
@@ -65,7 +80,6 @@ function AdminPanel() {
     banner: null,
     featured: false,
   });
-
   const [imageData, setImageData] = useState(null);
   const [categoryForm, setCategoryForm] = useState({
     name: "",
@@ -73,12 +87,53 @@ function AdminPanel() {
   });
   const [selectedCategories, setSelectedCategories] = useState([]);
 
+  // -------------------
+  // Pagination for Articles
+  // -------------------
+  const [basePaginationArticles, setBasePaginationArticles] = useState(0);
+  const [articlesPerPage, setArticlesPerPage] = useState(8);
+  const [articlesCurrentPage, setArticlesCurrentPage] = useState(1);
+  const articlesTotalPages = Math.ceil(articles.length / articlesPerPage);
+
+  const sortedArticles = articles.sort(
+    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+  );
+
+  const paginatedArticles = sortedArticles.slice(
+    basePaginationArticles,
+    basePaginationArticles + articlesPerPage
+  );
+
+  // -------------------
+  // Pagination for Categories
+  // -------------------
+  const [basePaginationCategories, setBasePaginationCategories] = useState(0);
+  const [categoriesPerPage, setCategoriesPerPage] = useState(3);
+  const [categoriesCurrentPage, setCategoriesCurrentPage] = useState(1);
+  const categoriesTotalPages = Math.ceil(categories.length / categoriesPerPage);
+  console.log("categoriesTotalPages:", categoriesTotalPages);
+
+  const sortedCategories = categories.sort((a, b) =>
+    a.name.localeCompare(b.name)
+  );
+
+  const paginatedCategories = sortedCategories.slice(
+    basePaginationCategories,
+    basePaginationCategories + categoriesPerPage
+  );
+
+  // -------------------
+  //      📚 Refs
+  // -------------------
   // refs for file inputs so we can reset them after upload
   const bannerInputRef = useRef(null);
   const imageInputRef = useRef(null);
 
-  // Session expiration handling
+  // -------------------
+  //     📄 Effects
+  // -------------------
   useEffect(() => {
+    // Session expiration handling
     const interval = setInterval(() => {
       if (isAuthenticated && token) {
         toast.info("Your session has expired. Please log in again.");
@@ -98,7 +153,23 @@ function AdminPanel() {
     }
   }, [tempId]);
 
-  // Handle form changes
+  // -------------------
+  //    ✋ Handlers
+  // -------------------
+  const handleArticlePageChange = (newPage) => {
+    setArticlesCurrentPage(newPage);
+    setBasePaginationArticles((newPage - 1) * articlesPerPage);
+  };
+
+  const handleCategoryPageChange = (newPage) => {
+    setCategoriesCurrentPage(newPage);
+    setBasePaginationCategories((newPage - 1) * categoriesPerPage);
+  };
+
+  /*
+   * Handle form input changes
+   * @param {Event} e - The input change event
+   */
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     if (name === "banner") {
@@ -126,7 +197,10 @@ function AdminPanel() {
     toast.info("Article editing cancelled");
   };
 
-  // Handle image file selection
+  /*
+   * Handle image file selection
+   * @param {Event} e - The file input change event
+   */
   const handleImageChange = (e) => {
     const { files } = e.target;
     if (files && files[0]) {
@@ -134,6 +208,10 @@ function AdminPanel() {
     }
   };
 
+  /* 
+  * Handle editing a category
+  + @param {Object} category - The category to edit
+  */
   const handleEditCategory = (category) => {
     if (!category) {
       toast.info("Category editing cancelled");
@@ -152,17 +230,23 @@ function AdminPanel() {
     });
   };
 
-  // Category form handlers
+  /*
+   * Handle category form input changes
+   * @param {Event} e - The input change event
+   */
   const handleCategoryFormChange = (e) => {
     const { name, value } = e.target;
     setCategoryForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle category submission
+  /*
+   * Handle category submission
+   * @param {Event} e - The form submission event
+   */
   const handleCategorySubmit = async (e) => {
     e.preventDefault();
     try {
-      await addCategory(categoryForm);
+      const newCat = await addCategory(categoryForm);
       setCategoryForm({ name: "", description: "" });
       toast.success("Categoría creada");
     } catch (err) {
@@ -170,7 +254,10 @@ function AdminPanel() {
     }
   };
 
-  // Handle category editing
+  /*
+   * Handle category edit submission
+   * @param {Event} e - The form submission event
+   */
   const handleEditCategorySubmit = async (e) => {
     e.preventDefault();
     try {
@@ -184,7 +271,10 @@ function AdminPanel() {
     }
   };
 
-  // Handle category deletion
+  /*
+   * Handle deleting a category
+   * @param {number} id - The ID of the category to delete
+   */
   const handleDeleteCategory = async (id) => {
     if (window.confirm("¿Eliminar esta categoría?")) {
       try {
@@ -204,7 +294,10 @@ function AdminPanel() {
     );
   };
 
-  // Handle article submission
+  /*
+   * Handle article form submission
+   * @param {Event} e - The form submission event
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -250,6 +343,10 @@ function AdminPanel() {
     }
   };
 
+  /*
+   * Handle image upload
+   * @param {Event} e - The form submission event
+   */
   const handleImageUpload = async (e) => {
     e.preventDefault();
     if (!imageData) return;
@@ -276,10 +373,15 @@ function AdminPanel() {
           `\n![alt text](${BACKEND_URL}${uploadedImage.url})`,
       }));
     } catch (error) {
+      console.error("Error uploading image:", error);
       toast.error("Error uploading image");
     }
   };
 
+  /*
+   * Handle setting an article for editing
+   * @param {Object} article - The article to edit
+   */
   const setEditingArticle = (article) => {
     toast.info("Article has been loaded to the form for editing");
     setEditingArticleId(article.id);
@@ -295,6 +397,10 @@ function AdminPanel() {
     setIsEditing(true);
   };
 
+  /*
+   * Handle deleting an article
+   * @param {string} id - The ID of the article to delete
+   */
   const handleDeleteArticle = async (id) => {
     if (window.confirm("Are you sure you want to delete this article?")) {
       try {
@@ -308,6 +414,10 @@ function AdminPanel() {
     }
   };
 
+  /*
+   * Handle submitting edited article
+   * @param {Event} e - The form submission event
+   */
   const handleSubmitEdit = async (e) => {
     e.preventDefault();
 
@@ -370,69 +480,89 @@ function AdminPanel() {
     }
   };
 
-  const isSubmittingArticle = articleLoading || tempIdLoading;
-  const isUploadingImage = imageLoading || tempIdLoading;
-
+  // -------------------
+  //      📦 State
+  // -------------------
   const [isEditing, setIsEditing] = useState(false);
   const [isEditingCategory, setIsEditingCategory] = useState(false);
   const [editingArticleId, setEditingArticleId] = useState(null);
 
+  const isSubmittingArticle = articleLoading || tempIdLoading;
+  const isUploadingImage = imageLoading || tempIdLoading;
+
   return (
     <div className="p-4 space-y-6 max-w-7xl mx-auto">
-      <h2 className="flex items-center gap-2 text-2xl font-bold justify-center">
-        <span>Admin Panel</span>
-      </h2>
+      <Fade cascade damping={0.05} triggerOnce duration={400}>
+        <h2 className="flex items-center gap-2 text-2xl font-bold justify-center">
+          <span>Admin Panel</span>
+        </h2>
 
-      <ErrorAlert
-        tempIdError={tempIdError}
-        articleError={articleError}
-        imageError={imageError}
-      />
-
-      <ArticleForm
-        formData={formData}
-        onChange={handleChange}
-        bannerInputRef={bannerInputRef}
-        imageInputRef={imageInputRef}
-        handleImageChange={handleImageChange}
-        handleImageUpload={handleImageUpload}
-        imageData={imageData}
-        isUploadingImage={isUploadingImage}
-        handleSubmit={handleSubmit}
-        isSubmittingArticle={isSubmittingArticle}
-        categories={categories}
-        selectedCategories={selectedCategories}
-        handleCategoryCheckbox={handleCategoryCheckbox}
-        isEditing={isEditing}
-        cancelEditArticle={cancelEditArticle}
-        handleSubmitEdit={handleSubmitEdit}
-      />
-      <Separator />
-      <CategoryManager
-        categoryForm={categoryForm}
-        onCategoryFormChange={handleCategoryFormChange}
-        onCategorySubmit={handleCategorySubmit}
-        onEditCategory={handleEditCategory}
-        categories={categories}
-        categoriesLoading={categoriesLoading}
-        onDeleteCategory={handleDeleteCategory}
-        isEditingCategory={isEditingCategory}
-        onEditCategorySubmit={handleEditCategorySubmit}
-      />
-
-      <Separator />
-
-      <div className="space-y-3">
-        <h3 className="text-lg font-bold">Existing Articles</h3>
-        <ArticlesList
-          articles={articles}
-          setEditingArticle={setEditingArticle}
-          handleSubmitEdit={handleSubmitEdit}
-          isSubmittingArticle={isSubmittingArticle}
-          isEditing={isEditing}
-          handleDeleteArticle={handleDeleteArticle}
+        <ErrorAlert
+          tempIdError={tempIdError}
+          articleError={articleError}
+          imageError={imageError}
         />
-      </div>
+
+        <ArticleForm
+          formData={formData}
+          onChange={handleChange}
+          bannerInputRef={bannerInputRef}
+          imageInputRef={imageInputRef}
+          handleImageChange={handleImageChange}
+          handleImageUpload={handleImageUpload}
+          imageData={imageData}
+          isUploadingImage={isUploadingImage}
+          handleSubmit={handleSubmit}
+          isSubmittingArticle={isSubmittingArticle}
+          categories={categories}
+          selectedCategories={selectedCategories}
+          handleCategoryCheckbox={handleCategoryCheckbox}
+          isEditing={isEditing}
+          cancelEditArticle={cancelEditArticle}
+          handleSubmitEdit={handleSubmitEdit}
+        />
+        <Separator />
+        <CategoryManager
+          categoryForm={categoryForm}
+          onCategoryFormChange={handleCategoryFormChange}
+          onCategorySubmit={handleCategorySubmit}
+          onEditCategory={handleEditCategory}
+          categories={paginatedCategories}
+          categoryAmount={categories.length}
+          categoriesLoading={categoriesLoading}
+          onDeleteCategory={handleDeleteCategory}
+          isEditingCategory={isEditingCategory}
+          onEditCategorySubmit={handleEditCategorySubmit}
+        />
+        {categoriesTotalPages > 1 && (
+          <PaginationControls
+            currentPage={categoriesCurrentPage}
+            totalPages={categoriesTotalPages}
+            onPageChange={handleCategoryPageChange}
+          />
+        )}
+        <Separator />
+
+        <div className="space-y-3">
+          <h3 className="text-lg font-bold">Existing Articles</h3>
+          <ArticlesList
+            articles={paginatedArticles}
+            articlesAmount={articles.length}
+            setEditingArticle={setEditingArticle}
+            handleSubmitEdit={handleSubmitEdit}
+            isSubmittingArticle={isSubmittingArticle}
+            isEditing={isEditing}
+            handleDeleteArticle={handleDeleteArticle}
+          />
+        </div>
+        {articlesTotalPages > 1 && (
+          <PaginationControls
+            currentPage={articlesCurrentPage}
+            totalPages={articlesTotalPages}
+            onPageChange={handleArticlePageChange}
+          />
+        )}
+      </Fade>
     </div>
   );
 }

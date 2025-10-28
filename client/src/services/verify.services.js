@@ -15,7 +15,6 @@ export const verifyEmail = async (token) => {
   return response.data;
 };
 
-
 /** Resend verification email
  * @param {string} email - User email
  * @returns {Promise<Object>} Resend result

@@ -1,3 +1,9 @@
+/*
+* ========================================================================================
+* ⚠️ This file's code was generated partially or completely by a Large Language Model (LLM).
+* ========================================================================================
+*/
+
 const { Like } = require("@/models/index");
 const { transformLikes } = require("@/utils/dataTransformers");
 

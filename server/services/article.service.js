@@ -1,36 +1,36 @@
+/*
+* ========================================================================================
+* ⚠️ This file's code was generated partially or completely by a Large Language Model (LLM).
+* ========================================================================================
+*/
+
 const {
   Article,
   User,
   Category,
-  Comment,
   Like,
   Image,
+  Comment
 } = require("@/models/index");
 const { adoptTempImages } = require("@/utils/imageUtils");
-
+const { transformArticle } = require("@/utils/dataTransformers"); 
 const fs = require("fs");
 const path = require("path");
 
 const createArticle = async (data) => {
   try {
     const { categoryIds, tempId, ...articleData } = data;
-
     const article = await Article.create(articleData);
 
     if (Array.isArray(categoryIds)) {
-      if (categoryIds.length > 0) {
-        const categories = await Category.findAll({
-          where: { id: categoryIds },
-        });
-        await article.setCategories(categories);
-      } else {
-        await article.setCategories([]);
-      }
+      const categories = categoryIds.length
+        ? await Category.findAll({ where: { id: categoryIds } })
+        : [];
+      await article.setCategories(categories);
     }
 
     await adoptTempImages(tempId, article.id);
-
-    return article;
+    return article.get({ plain: true });
   } catch (error) {
     throw new Error("Error creating article: " + error.message);
   }
@@ -40,33 +40,21 @@ const getAllArticles = async () => {
   try {
     const articles = await Article.findAll({
       include: [
-        {
-          model: User,
-          as: "author",
-          attributes: ["id", "username", "email"],
-        },
-        {
-          model: Image,
-          as: "images",
-          attributes: ["id", "url"],
-        },
+        { model: User, as: "author", attributes: ["id", "username", "email"] },
+        { model: Image, as: "images", attributes: ["id", "url"] },
         {
           model: Like,
           as: "likes",
-          attributes: ["id", "userId"],
-          where: {
-            commentId: null,
-          },
+          attributes: ["userId"],
+          where: { commentId: null },
           required: false,
         },
-        {
-          model: Category,
-          as: "categories",
-          attributes: ["id", "name"],
-        },
+        { model: Category, as: "categories", attributes: ["id", "name"] },
       ],
     });
-    return articles;
+
+    const plainArticles = articles.map(a => a.get({ plain: true }));
+    return transformArticle(plainArticles);
   } catch (error) {
     throw new Error("Error fetching articles: " + error.message);
   }
@@ -76,119 +64,90 @@ const getArticleById = async (id) => {
   try {
     const article = await Article.findByPk(id, {
       include: [
-        {
-          model: User,
-          as: "author",
-          attributes: ["id", "username", "email"],
-        },
-        {
-          model: Image,
-          as: "images",
-          attributes: ["id", "url"],
-        },
+        { model: User, as: "author", attributes: ["id", "username", "email"] },
+        { model: Image, as: "images", attributes: ["id", "url"] },
         {
           model: Like,
           as: "likes",
-          attributes: ["id", "userId"],
-          where: {
-            commentId: null,
-          },
+          attributes: ["userId"],
+          where: { commentId: null },
           required: false,
         },
-        {
-          model: Category,
-          as: "categories",
-          attributes: ["id", "name"],
-        },
+        { model: Category, as: "categories", attributes: ["id", "name"] },
       ],
     });
-    if (!article) {
-      throw new Error("Article not found");
-    }
-    return article;
+
+    if (!article) throw new Error("Article not found");
+
+    return transformArticle(article.get({ plain: true }));
   } catch (error) {
     throw new Error("Error fetching article: " + error.message);
   }
 };
 
 const updateArticle = async (id, data) => {
-  console.log("Updating article with ID:", id, "and data:", data);
   try {
     const article = await Article.findByPk(id);
-    if (!article) {
-      throw new Error("Article not found");
-    }
+    if (!article) throw new Error("Article not found");
 
     const { categoryIds, ...articleData } = data;
-
     await article.update(articleData);
 
     if (Array.isArray(categoryIds)) {
-      if (categoryIds.length > 0) {
-        const categories = await Category.findAll({
-          where: { id: categoryIds },
-        });
-        await article.setCategories(categories);
-      } else {
-        await article.setCategories([]);
-      }
+      const categories = categoryIds.length
+        ? await Category.findAll({ where: { id: categoryIds } })
+        : [];
+      await article.setCategories(categories);
     }
 
-    return article;
+    return article.get({ plain: true });
   } catch (error) {
     throw new Error("Error updating article: " + error.message);
   }
 };
 
 const deleteArticle = async (id) => {
-  if (!id) {
-    throw new Error("Article ID is required");
-  }
+  if (!id) throw new Error("Article ID is required");
 
   try {
     const article = await Article.findByPk(id);
-    if (!article) {
-      throw new Error("Article not found");
+    if (!article) throw new Error("Article not found");
+
+    const comments = await Comment.findAll({ where: { articleId: id } });
+    for (const c of comments) {
+      await c.destroy();
     }
 
-    const images = await Image.findAll({ where: { articleId: article.id } });
+    await Like.destroy({ where: { articleId: id, commentId: null } });
 
+    await article.setCategories([]);
+
+    const images = await Image.findAll({ where: { articleId: id } });
     for (const img of images) {
-      const imagePath = path.join(
-        __dirname,
-        "../uploads",
-        path.basename(img.url)
-      );
-
       try {
-        await fs.promises.unlink(imagePath);
+        await fs.promises.unlink(path.join(__dirname, "../uploads", path.basename(img.url)));
       } catch (err) {
         console.error("Error deleting image:", err);
       }
-
       await img.destroy();
     }
 
     if (article.banner) {
-      const bannerPath = path.join(
-        __dirname,
-        "../uploads",
-        path.basename(article.banner)
-      );
-
       try {
-        await fs.promises.unlink(bannerPath);
+        await fs.promises.unlink(path.join(__dirname, "../uploads", path.basename(article.banner)));
       } catch (err) {
         console.error("Error deleting banner image:", err);
       }
     }
 
     await article.destroy();
+
     return { success: true, message: "Article deleted" };
   } catch (error) {
     throw new Error("Error deleting article: " + error.message);
   }
 };
+
 
 module.exports = {
   createArticle,

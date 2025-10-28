@@ -1,7 +1,14 @@
-// routes/v1/article.routes.js
 const express = require("express");
 const router = express.Router();
 
+// ======================================================================
+//                   📰 Article Model
+// ======================================================================
+const { Article } = require("@/models/index"); 
+
+// ======================================================================
+//                  📰 Article Controllers
+// ======================================================================
 const {
   createArticle,
   getAllArticles,
@@ -9,14 +16,27 @@ const {
   updateArticle,
   deleteArticle,
 } = require("@/controllers/article.controller");
+
+// ======================================================================
+//            📁 File Upload Middlewares
+// ======================================================================
 const {
   upload,
   multerErrorHandler,
 } = require("@/middlewares/upload.middleware");
+
+// ======================================================================
+//            🔐 Authentication & Authorization Middlewares
+// ======================================================================
 const { verifyTempIdToken } = require("@/middlewares/tempid.middleware");
 const { isAdmin } = require("@/middlewares/isAdmin.middleware");
-const { verifyJWT } = require("@/middlewares/jwt.middleware");
+const { verifyJWT } = require("@/middlewares/verifyJWT.middleware");
+const { authorizeOwner } = require("@/middlewares/authorizeOwner.middleware");
 
+
+// ======================================================================
+//                      📰 Article Routes
+// ======================================================================
 // Create a new article
 router.post(
   "/",
@@ -38,7 +58,7 @@ router.get("/:id", getArticleById);
 router.put(
   "/:id",
   verifyJWT,
-  isAdmin,
+  authorizeOwner(async (req) => Article.findByPk(req.params.id), true),
   upload.single("banner"),
   multerErrorHandler,
   verifyTempIdToken,
@@ -46,6 +66,11 @@ router.put(
 );
 
 // Delete a specific article by ID
-router.delete("/:id", verifyJWT, isAdmin, deleteArticle);
+router.delete(
+  "/:id",
+  verifyJWT,
+  authorizeOwner(async (req) => Article.findByPk(req.params.id), true),
+  deleteArticle
+);
 
 module.exports = router;

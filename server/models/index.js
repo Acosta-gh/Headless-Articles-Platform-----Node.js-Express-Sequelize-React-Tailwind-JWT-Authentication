@@ -1,63 +1,98 @@
-  // models/index.js
-  const { Article } = require('@/models/article.model');
-  const { User } = require('@/models/user.model');
-  const { Image } = require('@/models/image.model');
-  const { Comment } = require('@/models/comment.model');
-  const { Like } = require('@/models/like.model');
-  const { Bookmark } = require('@/models/bookmark.model');
-  const { Category } = require('@/models/category.model');
+const { Article } = require('@/models/article.model');
+const { User } = require('@/models/user.model');
+const { Image } = require('@/models/image.model');
+const { Comment } = require('@/models/comment.model');
+const { Like } = require('@/models/like.model');
+const { Bookmark } = require('@/models/bookmark.model');
+const { Category } = require('@/models/category.model');
 
-  // Define associations
-  Article.belongsTo(User, { foreignKey: 'authorId', as: 'author' });
-  User.hasMany(Article, { foreignKey: 'authorId', as: 'articles' });
+// =====================
+// User ↔ Article
+// =====================
+Article.belongsTo(User, { foreignKey: 'authorId', as: 'author', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+User.hasMany(Article, { foreignKey: 'authorId', as: 'articles', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
 
-  Image.belongsTo(Article, { foreignKey: 'articleId', as: 'article' });
-  Article.hasMany(Image, { foreignKey: 'articleId', as: 'images' });
+// =====================
+// Article ↔ Image
+// =====================
+Image.belongsTo(Article, { foreignKey: 'articleId', as: 'article', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+Article.hasMany(Image, { foreignKey: 'articleId', as: 'images', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
 
-  Comment.belongsTo(Article, { foreignKey: 'articleId', as: 'article' });
-  Article.hasMany(Comment, { foreignKey: 'articleId', as: 'comments' });
+// =====================
+// Article ↔ Comment
+// =====================
+Comment.belongsTo(Article, { foreignKey: 'articleId', as: 'article', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+Article.hasMany(Comment, { foreignKey: 'articleId', as: 'comments', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
 
-  Comment.belongsTo(User, { foreignKey: 'userId', as: 'user' });
-  User.hasMany(Comment, { foreignKey: 'userId', as: 'comments' });
+// =====================
+// Comment ↔ User
+// =====================
+Comment.belongsTo(User, { foreignKey: 'userId', as: 'user', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+User.hasMany(Comment, { foreignKey: 'userId', as: 'comments', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
 
-  Comment.belongsTo(Comment, { foreignKey: 'commentId', as: 'parentComment' });
-  Comment.hasMany(Comment, { foreignKey: 'commentId', as: 'replies' });
+// =====================
+// Comment ↔ Comment (Replies)
+// =====================
+Comment.belongsTo(Comment, { foreignKey: 'commentId', as: 'parentComment', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+Comment.hasMany(Comment, { foreignKey: 'commentId', as: 'replies', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
 
-  Like.belongsTo(Article, { foreignKey: 'articleId', as: 'article' });
-  Article.hasMany(Like, { foreignKey: 'articleId', as: 'likes' });
+// =====================
+// Like ↔ Article
+// =====================
+Like.belongsTo(Article, { foreignKey: 'articleId', as: 'article', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+Article.hasMany(Like, { foreignKey: 'articleId', as: 'likes', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
 
-  Like.belongsTo(User, { foreignKey: 'userId', as: 'user' });
-  User.hasMany(Like, { foreignKey: 'userId', as: 'likes' });
+// =====================
+// Like ↔ User
+// =====================
+Like.belongsTo(User, { foreignKey: 'userId', as: 'user', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+User.hasMany(Like, { foreignKey: 'userId', as: 'likes', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
 
-  Bookmark.belongsTo(Article, { foreignKey: 'articleId', as: 'article' });
-  Article.hasMany(Bookmark, { foreignKey: 'articleId', as: 'bookmarks' });
+// =====================
+// Like ↔ Comment
+// =====================
+Like.belongsTo(Comment, { foreignKey: 'commentId', as: 'comment', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+Comment.hasMany(Like, { foreignKey: 'commentId', as: 'likes', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
 
-  Bookmark.belongsTo(User, { foreignKey: 'userId', as: 'user' });
-  User.hasMany(Bookmark, { foreignKey: 'userId', as: 'bookmarks' });
+// =====================
+// Bookmark ↔ Article
+// =====================
+Bookmark.belongsTo(Article, { foreignKey: 'articleId', as: 'article', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+Article.hasMany(Bookmark, { foreignKey: 'articleId', as: 'bookmarks', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
 
-  Like.belongsTo(Comment, { foreignKey: 'commentId', as: 'comment' });
-  Comment.hasMany(Like, { foreignKey: 'commentId', as: 'likes' });
+// =====================
+// Bookmark ↔ User
+// =====================
+Bookmark.belongsTo(User, { foreignKey: 'userId', as: 'user', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+User.hasMany(Bookmark, { foreignKey: 'userId', as: 'bookmarks', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
 
-  Article.belongsToMany(Category, { 
-    through: 'ArticleCategories', // Intermediate table
-    foreignKey: 'articleId',      // Key pointing to Article
-    otherKey: 'categoryId',       // Key pointing to Category
-    as: 'categories'              // Alias for the association
-  });
+// =====================
+// Article ↔ Category (Many-to-Many)
+// =====================
+Article.belongsToMany(Category, { 
+  through: 'ArticleCategories',
+  foreignKey: 'articleId',
+  otherKey: 'categoryId',
+  as: 'categories',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE'
+});
 
-  Category.belongsToMany(Article, {
-    through: 'ArticleCategories',  // Intermediate table
-    foreignKey: 'categoryId',      // Key pointing to Category
-    otherKey: 'articleId',         // Key pointing to Article
-    as: 'articles'                 // Alias for the association
-  });
+Category.belongsToMany(Article, {
+  through: 'ArticleCategories',
+  foreignKey: 'categoryId',
+  otherKey: 'articleId',
+  as: 'articles',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE'
+});
 
-  module.exports = {
-    Article,
-    User,
-    Image,
-    Comment,
-    Like,
-    Bookmark,
-    Category
-  };
+module.exports = {
+  Article,
+  User,
+  Image,
+  Comment,
+  Like,
+  Bookmark,
+  Category
+};

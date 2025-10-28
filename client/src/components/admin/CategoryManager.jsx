@@ -13,12 +13,13 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Trash2, Edit2, Plus } from "lucide-react";
 
-export default function CategoryManager({
+function CategoryManager({
   categoryForm,
   onCategoryFormChange,
   onCategorySubmit,
   onEditCategory,
   categories,
+  categoryAmount,
   categoriesLoading,
   onDeleteCategory,
   isEditingCategory,
@@ -113,7 +114,7 @@ export default function CategoryManager({
       <div className="space-y-3">
         <div className="px-1">
           <h2 className="text-lg font-semibold tracking-tight">
-            Categories ({categories.length})
+            Categories ({categoryAmount})
           </h2>
           <p className="text-sm text-muted-foreground">
             Manage your existing categories below.
@@ -176,3 +177,5 @@ export default function CategoryManager({
     </div>
   );
 }
+
+export default CategoryManager;

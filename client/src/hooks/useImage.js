@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 
 import { uploadImage } from "@/services/image.services";
-
+import { useAuth } from "@/hooks/useAuth";
 export const useImage = () => {
   const [imageUrl, setImageUrl] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
+  const { token } = useAuth();
   /*
     * Upload a new image to the server
     @param {File} file - Image file to upload
@@ -16,7 +16,7 @@ export const useImage = () => {
   const uploadNewImage = useCallback(async (file, tempIdToken) => {
     setLoading(true);
     try {
-      const uploadedImageUrl = await uploadImage(file, tempIdToken);
+      const uploadedImageUrl = await uploadImage(file, tempIdToken, token);
       setImageUrl(uploadedImageUrl);
       return uploadedImageUrl;
     } catch (error) {

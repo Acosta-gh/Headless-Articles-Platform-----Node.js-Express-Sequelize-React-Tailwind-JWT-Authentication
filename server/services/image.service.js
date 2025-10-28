@@ -1,8 +1,8 @@
 const {Image} = require('@/models/index');
 
 const createImage = async (data) => {
+  console.log("Creating image with data:", data);
   try {
-    console.log("Creating image with data:", data);
     const image = await Image.create(data);
     return image;
   } catch (error) {

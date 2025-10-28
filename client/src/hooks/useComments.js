@@ -1,10 +1,16 @@
-import { useState } from "react";
+/*
+ * ========================================================================================
+ * ⚠️ This file's code was generated partially or completely by a Large Language Model (LLM).
+ * ========================================================================================
+ */
+
+import { useState, useCallback } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import {
+  getAllCommentsByArticleId,
   createComment,
   deleteComment,
-  getAllCommentsByArticleId,
 } from "@/services/comment.services";
-import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 
 export const useComments = () => {
@@ -14,154 +20,170 @@ export const useComments = () => {
 
   const { token, isAuthenticated } = useAuth();
 
-  const fetchAllCommentsByArticleId = async (articleId) => {
-    setLoading(true);
-    try {
-      const data = await getAllCommentsByArticleId(articleId);
-      const normalized = data.map((c) => ({
-        ...c,
-        replies: (c.replies || []).map((reply) => ({
-          ...reply,
-          likeIds: reply.likeIds || [],
-          likeCount: reply.likeCount || 0,
-        })),
-        likeIds: c.likeIds || [],
-        likeCount: c.likeCount || 0,
-      }));
+  /* 
+  * Fetch all comments for a specific article
+  @param {string} articleId - ID of the article
+  */
+  const fetchAllCommentsByArticleId = useCallback(
+    async (articleId) => {
+      setLoading(true);
+      try {
+        const data = await getAllCommentsByArticleId(articleId);
+        setComments(data);
+      } catch (err) {
+        setError(err);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [token]
+  );
 
-      setComments(normalized);
-    } catch (err) {
-      setError(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  /*
+  * Add a new comment or reply
+  @param {Object} commentData - Data for the new comment or reply
+  */
+  const addComment = useCallback(
+    async (commentData) => {
+      setLoading(true);
 
-  const addComment = async (commentData) => {
-    setLoading(true);
-
-    if (!isAuthenticated()) {
-      toast.error("You must be logged in to post a comment.");
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const newComment = await createComment(commentData, token);
-
-      if (newComment.commentId) {
-        setComments((prevComments) => {
-          return prevComments.map((c) => {
-            if (c.id === newComment.commentId) {
-              const updatedReplies = c.replies
-                ? [...c.replies, newComment]
-                : [newComment];
-              return {
-                ...c,
-                replies: updatedReplies,
-              };
-            } else {
-              return c;
-            }
-          });
+      if (!isAuthenticated()) {
+        toast.error("You must be logged in to post a comment.", {
+          action: {
+            label: "Close Notification",
+            onClick: () => {},
+          },
+           duration: 2500,
         });
-      } else {
-        const normalizedNewComment = {
-          ...newComment,
-          replies: newComment.replies || [],
-          likeIds: newComment.likeIds || [],
-          likeCount: newComment.likeCount || 0,
-        };
-        setComments((prevComments) => [normalizedNewComment, ...prevComments]);
+        setLoading(false);
+        return;
       }
 
-      if (commentData.commentId) {
-        toast.success("Reply added successfully.");
-      } else {
-        toast.success("Comment added successfully.");
+      try {
+        const newComment = await createComment(commentData, token);
+
+        if (newComment.commentId) {
+          setComments((prevComments) =>
+            prevComments.map((c) =>
+              c.id === newComment.commentId
+                ? { ...c, replies: [...(c.replies || []), newComment] }
+                : c
+            )
+          );
+        } else {
+          setComments((prevComments) => [newComment, ...prevComments]);
+        }
+
+        toast.success(
+          newComment.commentId
+            ? "Reply added successfully."
+            : "Comment added successfully.",
+          {
+            action: {
+              label: "Close Notification",
+              onClick: () => {},
+            },
+            duration: 1500,
+          }
+        );
+        return newComment;
+      } catch (err) {
+        if (error.response && error.response.status === 429) {
+          toast.error("Rate limit exceeded. Please try again later.");
+        } else {
+          console.error("Error adding comment:", err);
+        }
+        setError(err);
+        throw err;
+      } finally {
+        setLoading(false);
       }
+    },
+    [isAuthenticated, token]
+  );
 
-      return newComment;
-    } catch (err) {
-      setError(err);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const updateCommentLikes = (commentId, likeData) => {
-    //console.log(`Updating likes for comment ${commentId}:`, likeData);
-
+  /* 
+  * Update likes for a comment or reply
+  @param {string} commentId - ID of the comment or reply
+  @param {Object} likeData - Data containing updated like information
+  */
+  const updateCommentLikes = useCallback((commentId, likeData) => {
     setComments((prevComments) =>
-      prevComments.map((c) => {
-        if (c.id === commentId) {
+      prevComments.map((comment) => {
+        if (comment.id === commentId) {
           return {
-            ...c,
+            ...comment,
             likeCount: likeData.likeCount,
             likeIds: likeData.likeIds || [],
           };
         }
-
-        // También actualizar replies
-        if (c.replies && c.replies.length > 0) {
-          return {
-            ...c,
-            replies: c.replies.map((reply) =>
-              reply.id === commentId
-                ? {
-                    ...reply,
-                    likeCount: likeData.likeCount,
-                    likeIds: likeData.likeIds || [],
-                  }
-                : reply
-            ),
-          };
-        }
-
-        return c;
+        const updatedReplies = comment.replies?.map((reply) =>
+          reply.id === commentId
+            ? {
+                ...reply,
+                likeCount: likeData.likeCount,
+                likeIds: likeData.likeIds || [],
+              }
+            : reply
+        );
+        return updatedReplies
+          ? { ...comment, replies: updatedReplies }
+          : comment;
       })
     );
-  };
+  }, []);
 
-  const removeComment = async (comment) => {
-    setLoading(true);
-    try {
-      await deleteComment(comment.id, token);
+  /*
+  * Remove a comment or reply
+  @param {Object} comment - Comment or reply object to be removed
+  */
+  const removeComment = useCallback(
+    async (comment) => {
+      setLoading(true);
+      try {
+        await deleteComment(comment.id, token);
 
-      if (comment.commentId) {
-        // Es una reply
-        setComments((prev) =>
-          prev.map((c) => {
-            if (c.id === comment.commentId) {
-              return {
-                ...c,
-                replies: c.replies.filter((r) => r.id !== comment.id),
-              };
-            }
-            return c;
-          })
-        );
-        toast.success("Reply deleted successfully");
+        if (comment.commentId) {
+          setComments((prev) =>
+            prev.map((c) =>
+              c.id === comment.commentId
+                ? {
+                    ...c,
+                    replies: c.replies.filter((r) => r.id !== comment.id),
+                  }
+                : c
+            )
+          );
+          toast.success("Reply deleted successfully");
+          setLoading(false);
+          return;
+        } else {
+          setComments((prev) => prev.filter((c) => c.id !== comment.id));
+          toast.success(
+            "Comment deleted successfully",
+            {
+              action: {
+                label: "Close Notification",
+                onClick: () => {},
+              },
+               duration: 1500,
+            },
+          );
+        }
+      } catch (err) {
+        toast.error("Failed to delete comment");
+        setError(err);
+        throw err;
+      } finally {
         setLoading(false);
-        return;
-      } else {
-        // Es un comentario principal
-        setComments((prev) => prev.filter((c) => c.id !== comment.id));
-        toast.success("Comment deleted successfully");
       }
-
-      setComments((prev) => prev.filter((c) => c.id !== comment.id));
-    } catch (err) {
-      setError(err);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [token]
+  );
 
   return {
     comments,
+    setComments,
     loading,
     error,
     fetchAllCommentsByArticleId,

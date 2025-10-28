@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Upload, Image as ImageIcon, X } from "lucide-react";
 
-export default function ImageUploader({
+function ImageUploader({
   imageInputRef,
   onImageChange,
   onUpload,
@@ -60,3 +60,5 @@ export default function ImageUploader({
     </div>
   );
 }
+
+export default ImageUploader;

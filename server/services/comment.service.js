@@ -1,3 +1,9 @@
+/*
+* ========================================================================================
+* ⚠️ This file's code was generated partially or completely by a Large Language Model (LLM).
+* ========================================================================================
+*/
+
 const { Comment, User, Like } = require("@/models/index");
 const {
   transformComment,
@@ -16,6 +22,7 @@ const createComment = async (data, userId) => {
       userId,
     });
 
+    // This is to include user info in the returned comment right after creation
     const commentWithUser = await Comment.findByPk(comment.id, {
       include: {
         model: User,

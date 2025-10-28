@@ -1,43 +1,45 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link, useNavigate } from "react-router-dom";
 import { Spinner } from "@/components/ui/spinner";
 import { useAuth } from "@/hooks/useAuth";
 
-const DEFAULT_LOGO = {
-  url: "https://www.shadcnblocks.com",
-  src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/shadcnblockscom-wordmark.svg",
-  alt: "logo",
-  title: "shadcnblocks.com",
-};
+import { Fade } from "react-awesome-reveal";
 
 const LoginPage = ({
   heading = "Login",
-  logo = DEFAULT_LOGO,
   buttonText = "Login",
   signupText = "Need an account?",
   signupUrl = "/signup",
   redirectUrl = "/profile",
-
 }) => {
+  // -------------------
+  //      🎣 Hooks
+  // -------------------
   const navigate = useNavigate();
   const { login, loading } = useAuth();
-  
-  const [formData, setFormData] = React.useState({
+
+  // -------------------
+  //      📦 State
+  // -------------------
+  const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
 
+  // -------------------
+  //     🖐️ Handlers
+  // -------------------
   /**
    * Handle input change
    * @param {Event} e
    */
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({ 
-      ...prevData, 
-      [name]: value 
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
     }));
   };
 
@@ -47,7 +49,7 @@ const LoginPage = ({
    */
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     const result = await login(formData);
 
     if (!result.success) {
@@ -59,75 +61,60 @@ const LoginPage = ({
   };
 
   return (
-    <section className="bg-muted h-screen">
-      <div className="flex h-full items-center justify-center">
-        <div className="flex flex-col items-center gap-6 lg:justify-start">
-          {/* Logo */}
-          <a href={logo.url}>
-            <img
-              src={logo.src}
-              alt={logo.alt}
-              title={logo.title}
-              className="h-10 dark:invert"
-            />
-          </a>
-
-          {/* Login Form */}
-          <form
-            onSubmit={handleSubmit}
-            className="min-w-sm border-muted bg-background flex w-full max-w-sm flex-col items-center gap-y-4 rounded-md border px-6 py-8 shadow-md"
-          >
-            {heading && (
-              <h1 className="text-xl font-semibold">{heading}</h1>
-            )}
-
-            <Input
-              type="email"
-              placeholder="Email"
-              className="text-sm"
-              required
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              disabled={loading}
-            />
-
-            <Input
-              type="password"
-              placeholder="Password"
-              className="text-sm"
-              required
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              disabled={loading}
-            />
-
-            <Button 
-              type="submit" 
-              className="w-full" 
-              disabled={loading}
+    <Fade cascade triggerOnce duration={500}>
+      <section className="bg-muted h-screen">
+        <div className="flex h-full items-center justify-center">
+          <div className="flex flex-col items-center gap-6 lg:justify-start">
+            {/* Login Form */}
+            <form
+              onSubmit={handleSubmit}
+              className="min-w-sm border-muted bg-background flex w-full max-w-sm flex-col items-center gap-y-4 rounded-md border px-6 py-8 shadow-md"
             >
-              {loading ? <Spinner className="mr-2" /> : null}
-              {loading ? "Loading..." : buttonText}
-            </Button>
-          </form>
+              {heading && <h1 className="text-xl font-semibold">{heading}</h1>}
 
-          {/* Signup Link */}
-          <div className="text-muted-foreground flex justify-center gap-1 text-sm">
-            <p>{signupText}</p>
-            <Link
-              to={signupUrl}
-              className="text-primary font-medium hover:underline"
-            >
-              Sign Up
-            </Link>
+              <Input
+                type="email"
+                placeholder="Email"
+                className="text-sm"
+                required
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                disabled={loading}
+              />
+
+              <Input
+                type="password"
+                placeholder="Password"
+                className="text-sm"
+                required
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                disabled={loading}
+              />
+
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? <Spinner className="mr-2" /> : null}
+                {loading ? "Loading..." : buttonText}
+              </Button>
+            </form>
+
+            {/* Signup Link */}
+            <div className="text-muted-foreground flex justify-center gap-1 text-sm">
+              <p>{signupText}</p>
+              <Link
+                to={signupUrl}
+                className="text-primary font-medium hover:underline"
+              >
+                Sign Up
+              </Link>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </Fade>
   );
 };
 
 export default LoginPage;
-export { LoginPage };

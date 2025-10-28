@@ -24,6 +24,10 @@ export const useVerify = () => {
     }
   }, []);
 
+  /*
+    * Resend verification email to the specified email address
+    @param {string} email - User's email address
+  */
   const resendVerificationEmail = useCallback(async (email) => {
     setLoading(true);
     setError(null);

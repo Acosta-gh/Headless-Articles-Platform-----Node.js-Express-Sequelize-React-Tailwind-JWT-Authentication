@@ -1,4 +1,9 @@
-// controllers/article.controller.js
+/*
+* ========================================================================================
+* ⚠️ This file's code was generated partially or completely by a Large Language Model (LLM).
+* ========================================================================================
+*/
+
 const articleService = require("@/services/article.service");
 
 async function createArticle(req, res) {

@@ -1,7 +1,6 @@
-import React from "react";
-import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
-export function FeaturedPostSidebarItem({
+
+function FeaturedSidebarArticle({
   imageSrc,
   imageAlt,
   title,
@@ -10,12 +9,11 @@ export function FeaturedPostSidebarItem({
   articleId,
 }) {
   return (
-    <div className="group flex gap-3 rounded-lg border border-transparent p-3 hover:border-primary/50 hover:bg-accent transition-all duration-200 cursor-pointer">
+    <Link to={`/article/${articleId}`} className="group flex gap-3 rounded-lg border border-transparent p-3 hover:border-primary/50 hover:bg-accent transition-all duration-200 cursor-pointer">
       {/* Thumbnail */}
-      <Link to={`/article/${articleId}`}>
         <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-md bg-muted">
           <img
-            src={imageSrc || "/placeholder.svg"}
+            src={imageSrc}
             alt={imageAlt}
             className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-200"
           />
@@ -35,6 +33,7 @@ export function FeaturedPostSidebarItem({
           )}
         </div>
       </Link>
-    </div>
   );
 }
+
+export default FeaturedSidebarArticle;

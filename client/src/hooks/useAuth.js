@@ -1,3 +1,9 @@
+/*
+ * ========================================================================================
+ * ⚠️ This file's code was generated partially or completely by a Large Language Model (LLM).
+ * ========================================================================================
+ */
+
 import { useCallback, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "sonner";
@@ -11,8 +17,6 @@ import { resendVerificationEmail as resendEmailService } from "@/services/verify
 const TOKEN_KEY = "token";
 const RESEND_STORAGE_KEY = "resend_cooldowns";
 const RESEND_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutos
-
-
 
 /**
  * Get token from localStorage
@@ -31,10 +35,10 @@ function setToken(token) {
 }
 
 /**
- * Get user ID from token 
+ * Get user ID from token
  * @returns {string|null} user ID from token
  */
-function getUserId(){
+function getUserId() {
   const token = getToken();
   if (!token) return null;
 
@@ -145,7 +149,7 @@ export function useAuth() {
    * Handle resend verification email with rate limiting
    */
   const handleResendVerification = useCallback(async (email) => {
-    // Chequear cooldown local primero
+    // Check cooldown
     const remainingTime = getRemainingCooldown(email);
     if (remainingTime > 0) {
       const mins = Math.floor(remainingTime / 60);
@@ -162,17 +166,17 @@ export function useAuth() {
       const result = await resendEmailService(email);
       console.log("Resend result:", result);
 
-      // Guardar timestamp del envío
+      // Set cooldown timestamp
       setCooldown(email, Date.now());
 
       return result;
     } catch (error) {
       console.error("Resend error:", error);
 
-      // Manejar error de rate limit del backend (429)
+      // Handle backend rate limit error (429)
       if (error.response?.status === 429) {
         const retryAfter = error.response?.data?.retryAfter || 300;
-        setCooldown(email, Date.now()); // Sincronizar con backend
+        setCooldown(email, Date.now()); // Synchronize cooldown
         throw new Error(
           `Too many requests. Please wait ${Math.ceil(
             retryAfter / 60
@@ -203,43 +207,40 @@ export function useAuth() {
             data.error.includes("not verified") ||
             data.error.includes("verify")
           ) {
-            // Verificar si hay cooldown activo
+            // Verify if cooldown is active
             const remainingTime = getRemainingCooldown(credentials.email);
 
             if (remainingTime > 0) {
               const mins = Math.floor(remainingTime / 60);
               const secs = remainingTime % 60;
 
-              toast.error("Email has not been verified.")
-              toast.error(`Please wait ${mins}:${secs
-                .toString()
-                .padStart(2, "0")} before resending`, {
-                duration: 10000,
-              });
+              toast.error("Email has not been verified.");
+              toast.error(
+                `Please wait ${mins}:${secs
+                  .toString()
+                  .padStart(2, "0")} before resending`,
+                {
+                  duration: 10000,
+                }
+              );
             } else {
               toast.error("Email has not been verified.", {
-          
                 action: {
                   label: "Resend Email",
                   onClick: async () => {
-                    const toastId = "resend-email"; // ID único para el toast
+                    const toastId = "resend-email"; //Unique ID for this toast
 
                     try {
-                      // Mostrar loading
                       toast.loading("Sending verification email...", {
                         id: toastId,
                       });
 
-                      // Intentar reenviar
                       await handleResendVerification(credentials.email);
 
-                      // Éxito
                       toast.success(
                         "Verification email sent! Check your inbox.",
                         {
                           id: toastId,
-                          description:
-                            "Please wait 5 minutes before requesting another email.",
                         }
                       );
                     } catch (error) {
@@ -268,7 +269,13 @@ export function useAuth() {
         }
 
         setToken(data.token);
-        toast.success("Login successful");
+        toast.success("Login successful", {
+          action: {
+            label: "Close Notification",
+            onClick: () => {},
+          },
+          duration: 1500,
+        });
 
         return {
           success: true,
@@ -329,7 +336,12 @@ export function useAuth() {
    */
   const logout = useCallback(() => {
     removeToken();
-    toast.success("Logged out successfully");
+    toast.success("Logged out successfully", {
+      action: {
+        label: "Close Notification",
+        onClick: () => {},
+      },
+    });
   }, []);
 
   /**
@@ -355,7 +367,7 @@ export function useAuth() {
     register,
     logout,
     isAuthenticated,
-    isAdmin,
+    isAdmin: isAdmin(),
     loading,
     userId: getUserId(),
     token: getToken(),

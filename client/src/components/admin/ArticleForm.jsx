@@ -24,16 +24,18 @@ import {
   Eye,
 } from "lucide-react";
 
+import PaginationControls from "@/components/common/PaginationControls";
 import ImageUploader from "@/components/admin/ImageUploader";
-import { BACKEND_URL } from "@/components/constants";
+import { BACKEND_URL } from "@/components/Constants";
 
-export default function ArticleForm({
+function ArticleForm({
   formData,
   onChange,
   bannerInputRef,
   imageInputRef,
   handleImageChange,
   handleImageUpload,
+  articlesAmount,
   imageData,
   isUploadingImage,
   handleSubmit,
@@ -46,6 +48,25 @@ export default function ArticleForm({
   handleSubmitEdit,
 }) {
   const [bannerPreview, setBannerPreview] = useState(null);
+
+  // -------------------
+  // Pagination for Categories
+  // -------------------
+  const [basePaginationCategories, setBasePaginationCategories] = useState(0);
+  const [categoriesPerPage, setCategoriesPerPage] = useState(12);
+  const [categoriesCurrentPage, setCategoriesCurrentPage] = useState(1);
+  const categoriesTotalPages = Math.ceil(categories.length / categoriesPerPage);
+
+  const paginatedCategories = categories.slice(
+    basePaginationCategories,
+    basePaginationCategories + categoriesPerPage
+  );
+
+  const handleCategoryPageChange = (newPage) => {
+    setCategoriesCurrentPage(newPage);
+    const newBase = (newPage - 1) * categoriesPerPage;
+    setBasePaginationCategories(newBase);
+  };
 
   useEffect(() => {
     if (isEditing && formData.banner) {
@@ -69,11 +90,10 @@ export default function ArticleForm({
     setBannerPreview(null);
   };
 
-
   const handleCancelEdit = () => {
     cancelEditArticle();
     setBannerPreview(null);
-  }
+  };
 
   const handleBannerChange = (e) => {
     const file = e.target.files?.[0];
@@ -159,13 +179,9 @@ export default function ArticleForm({
                 : "Fill in the details to publish a new article"}
             </CardDescription>
           </CardHeader>
-        </Card>
 
-        {/* Title Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Basic Information</CardTitle>
-          </CardHeader>
+          {/* Title Section */}
+
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="title" className="text-sm font-medium">
@@ -183,16 +199,9 @@ export default function ArticleForm({
               />
             </div>
           </CardContent>
-        </Card>
 
-        {/* Banner Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Article banner</CardTitle>
-            <CardDescription>
-              Upload a banner image that represents your article
-            </CardDescription>
-          </CardHeader>
+          {/* Banner Section */}
+
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="banner" className="text-sm font-medium">
@@ -230,16 +239,9 @@ export default function ArticleForm({
               </div>
             )}
           </CardContent>
-        </Card>
 
-        {/* Content Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Content</CardTitle>
-            <CardDescription>
-              Write the main content of your article here
-            </CardDescription>
-          </CardHeader>
+          {/* Content Section */}
+
           <CardContent className="space-y-3">
             {/* Markdown Toolbar */}
             <div className="space-y-2">
@@ -290,24 +292,21 @@ export default function ArticleForm({
               </p>
             </div>
           </CardContent>
-        </Card>
 
-        {/* Categories Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Categories</CardTitle>
-            <CardDescription>
-              Select the categories that best fit your article
-            </CardDescription>
-          </CardHeader>
+          {/* Categories Section */}
+
           <CardContent>
+            <div className="space-y-2 mb-3">
+              <Label className="text-sm font-medium">Tags/Categories</Label>
+            </div>
+
             {categories.length === 0 ? (
               <p className="text-sm text-muted-foreground">
                 No categories available. Please create categories first.
               </p>
             ) : (
               <div className="flex flex-wrap gap-3">
-                {categories.map((cat) => (
+                {paginatedCategories.map((cat) => (
                   <div
                     key={cat.id}
                     className="flex items-center space-x-2 p-2 rounded-lg border border-input hover:bg-accent transition-colors"
@@ -334,14 +333,16 @@ export default function ArticleForm({
                 ))}
               </div>
             )}
+            {categoriesTotalPages > 1 && (
+              <PaginationControls
+                currentPage={categoriesCurrentPage}
+                totalPages={categoriesTotalPages}
+                onPageChange={handleCategoryPageChange}
+              />
+            )}
           </CardContent>
-        </Card>
 
-        {/* Featured Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Publication Options</CardTitle>
-          </CardHeader>
+          {/* Featured Section */}
           <CardContent>
             <div className="flex items-center space-x-3 p-3 rounded-lg border border-input hover:bg-accent/50 transition-colors cursor-pointer">
               <Checkbox
@@ -369,34 +370,38 @@ export default function ArticleForm({
               </div>
             </div>
           </CardContent>
+          <CardContent>
+            {/* Submit Button */}
+            <div className="flex gap-2 pt-4 ">
+              <Button
+                type="submit"
+                disabled={isSubmittingArticle}
+                size="lg"
+                className="flex-1 cursor-pointer"
+              >
+                {isSubmittingArticle && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                {isEditing ? "Update Article" : "Create Article"}
+              </Button>
+              {isEditing && (
+                <Button
+                  type="submit"
+                  disabled={isSubmittingArticle}
+                  size="lg"
+                  variant="outline"
+                  className="flex-1 cursor-pointer"
+                  onClick={handleCancelEdit}
+                >
+                  Cancel
+                </Button>
+              )}
+            </div>
+          </CardContent>
         </Card>
-
-        {/* Submit Button */}
-        <div className="flex gap-2 pt-4">
-          <Button
-            type="submit"
-            disabled={isSubmittingArticle}
-            size="lg"
-            className="flex-1"
-          >
-            {isSubmittingArticle && (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            )}
-            {isEditing ? "Update Article" : "Create Article"}
-          </Button>
-          {isEditing && (
-            <Button
-              type="submit"
-              disabled={isSubmittingArticle}
-              size="lg"
-              className="flex-1"
-              onClick={handleCancelEdit}
-            >
-              Cancel
-            </Button>
-          )}
-        </div>
       </form>
     </div>
   );
 }
+
+export default ArticleForm;

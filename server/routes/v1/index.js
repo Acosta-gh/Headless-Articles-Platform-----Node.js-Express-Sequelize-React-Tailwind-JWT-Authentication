@@ -2,6 +2,10 @@
 const express = require('express');
 const router = express.Router();
 
+
+// ======================================================================
+//                      🚪 Importing Route Modules
+// ======================================================================
 // Import article routes
 const articleRoutes = require('@/routes/v1/article.routes');
 const userRoutes = require('@/routes/v1/user.routes');
@@ -12,7 +16,9 @@ const categoryRoutes = require('@/routes/v1/category.routes');
 const verifyRoutes = require('@/routes/v1/verify.routes');
 const likeRoutes = require('@/routes/v1/like.routes');
 
-
+// ======================================================================
+//                      🚦 Defining Route Handlers
+// ======================================================================
 // Use verify routes for any requests to /verify
 router.use('/verify', verifyRoutes);
 // Use category routes for any requests to /category

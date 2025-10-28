@@ -18,11 +18,14 @@ export const getImages = async () => {
  * @returns {Promise<string>} URL of the uploaded image
  * @throws {Error} Network or server error
  */
-export const uploadImage = async (imageData, tempIdToken) => {
+export const uploadImage = async (imageData, tempIdToken, token) => {
+  console.log("Uploading image with tempIdToken:", tempIdToken);
   const response = await axios.post(IMAGES_URL, imageData, {
     headers: {
-      "x-tempid-token": tempIdToken, 
+      "x-tempid-token": tempIdToken,
+      Authorization: `Bearer ${token}`,
     },
   });
+  console.log("Upload response:", response.data);
   return response.data;
 };

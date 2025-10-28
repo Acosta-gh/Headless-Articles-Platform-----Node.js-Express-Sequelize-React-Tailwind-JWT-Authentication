@@ -19,9 +19,11 @@ const SignUpPage = lazy(() => import("./pages/SignUpPage"));
 const Profile = lazy(() => import("./pages/Profile"));
 const Loading = lazy(() => import("./components/Loading.jsx"));
 const Verify = lazy(() => import("./pages/Verify"));
-const ArticlePage = lazy(() => import("./pages/Article"));
+const ArticlePage = lazy(() => import("./pages/Article.jsx"));
+const Services = lazy(() => import("./pages/Services.jsx"));
+const AllArticles = lazy(() => import("./pages/AllArticles.jsx"));
 
-// 🔐 Componente para proteger rutas
+// 🔐 Protected Routes
 function ProtectedRoute({ children, requireAdmin = false }) {
   const { isAuthenticated, isAdmin } = useAuth(); 
 
@@ -29,14 +31,14 @@ function ProtectedRoute({ children, requireAdmin = false }) {
     return <Navigate to="/login" replace />;
   }
 
-  if (requireAdmin && !isAdmin()) {
+  if (requireAdmin && !isAdmin) {
     return <Navigate to="/" replace />;
   }
 
   return children;
 }
 
-// ⚙️ Configurar el router
+// ⚙️ Setup Router
 const router = createBrowserRouter([
   {
     path: "/",
@@ -69,7 +71,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "/article/:id",
+        path: "/article/:articleId",
         element: (
           <Suspense fallback={<Loading />}>
             <ArticlePage />
@@ -86,6 +88,22 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+      {
+        path: "/services",
+        element: (
+          <Suspense fallback={<Loading />}>
+            <Services />
+          </Suspense>
+        ),
+      },
+      {
+        path: "/articles",
+        element: (
+          <Suspense fallback={<Loading />}>
+            <AllArticles />
+          </Suspense>
+        ),
+      }
     ],
   },
   {

@@ -1,13 +1,7 @@
-/**
- * v0 by Vercel.
- * @see https://v0.app/t/yWYpaHrdyyX
- * Documentation: https://v0.app/docs#integrating-generated-code-into-your-nextjs-app
- */
-
 import React from "react";
 import { Link } from "react-router-dom";
 
-export default function NotFound() {
+function NotFound() {
   return (
     <div className="flex items-center min-h-screen px-4 py-12 sm:px-6 md:px-8 lg:px-12 xl:px-16">
       <div className="w-full space-y-6 text-center">
@@ -29,3 +23,5 @@ export default function NotFound() {
     </div>
   );
 }
+
+export default NotFound;

@@ -5,10 +5,9 @@ import ReactMarkdown from "react-markdown";
 import rehypeSanitize from "rehype-sanitize";
 
 function Content({ content, coverImage }) {
- 
-
+  console.log(content);
   return (
-    <article className="space-y-8">
+    <article className="space-y-8 ">
       {coverImage && (
         <div className="bg-muted aspect-video w-full overflow-hidden rounded-xl">
           <img
@@ -18,7 +17,7 @@ function Content({ content, coverImage }) {
           />
         </div>
       )}
-      <div className="prose prose-lg max-w-none">
+      <div className="prose max-w-none break-words">
         <ReactMarkdown
           rehypePlugins={[rehypeSanitize]}
           components={{

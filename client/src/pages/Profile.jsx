@@ -52,7 +52,7 @@ function Profile() {
   //  🔄 Early Returns
   // -------------------
   if (loading) return <Loading />;
-  if (error) return <Error message={error.message} />;
+  //if (error) return <Error message={error.message} />;
   if (!profile) return <p>No profile data available</p>;
 
   // -------------------
@@ -83,7 +83,6 @@ function Profile() {
     try {
       await updateProfile(formData);
     } catch (error) {
-      toast.error("Failed to update profile.");
       console.error("Error updating profile:", error);
     } finally {
       setIsEditing(false);
@@ -134,7 +133,7 @@ function Profile() {
                 </h2>
               ) : (
                 <h2 className="text-2xl font-bold text-center">
-                  {formData.username || profile.username}
+                  {profile.username}
                 </h2>
               )}
               <p className="text-sm text-muted-foreground text-center">
@@ -146,10 +145,19 @@ function Profile() {
             </div>
           </CardHeader>
           <CardFooter className="flex justify-center gap-4">
-            {isAdmin && (
-              <Button variant="outline">
-                <Link to="/admin">Admin Panel</Link>
-              </Button>
+            {isAdmin && !isEditing && (
+              <Link to="/manageArticles">
+                <Button variant="outline" className="cursor-pointer">
+                  Manage Articles
+                </Button>
+              </Link>
+            )}
+            {isAdmin && !isEditing && (
+              <Link to="/adminUsers">
+                <Button variant="outline" className="cursor-pointer">
+                  Manage Users
+                </Button>
+              </Link>
             )}
             {/*
             <Button
@@ -161,10 +169,7 @@ function Profile() {
             </Button>
             */}
             {isEditing ? (
-              <Button
-                className="cursor-pointer"
-                onClick={handleSubmitEdit}
-              >
+              <Button className="cursor-pointer" onClick={handleSubmitEdit}>
                 Save
               </Button>
             ) : (

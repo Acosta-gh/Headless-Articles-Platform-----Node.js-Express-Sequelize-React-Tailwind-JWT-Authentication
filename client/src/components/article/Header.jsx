@@ -8,7 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-
+import ShareButton from "@/components/article/ShareButton";
 import { Link } from "react-router-dom";
 
 function normalizeIds(ids) {
@@ -44,11 +44,15 @@ function Header({
       ? likedProp
       : userHasLiked(currentUserId, likeIds);
 
-  categories = categories.slice(0, 10); // Limit to 10 categories for disp  lay
+  categories = categories.slice(0, 10); // Limit to 10 categories for display
+
   return (
     <header className="space-y-6">
       {categories.map((cat) => (
-        <Link to={`/articles?category=${encodeURIComponent(cat.name)}`} key={cat.id}>
+        <Link
+          to={`/articles?category=${encodeURIComponent(cat.name)}`}
+          key={cat.id}
+        >
           <Badge className="bg-accent text-accent-foreground mr-2">
             {cat.name}
           </Badge>
@@ -115,16 +119,7 @@ function Header({
           <span className="text-muted-foreground text-[11px] font-medium tracking-widest uppercase">
             Share this
           </span>
-          {[LinkIcon, Pocket, Linkedin].map((Icon, i) => (
-            <Button
-              key={i}
-              variant="outline"
-              size="icon"
-              className="hover:bg-blog-hover h-9 w-9 rounded-full"
-            >
-              <Icon />
-            </Button>
-          ))}
+          <ShareButton url={window.location.href} />
         </div>
       </div>
       <hr />

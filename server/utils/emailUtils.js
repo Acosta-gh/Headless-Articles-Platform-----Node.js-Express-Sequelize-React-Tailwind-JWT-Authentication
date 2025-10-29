@@ -22,7 +22,7 @@ const transporter = nodemailer.createTransport({
 export const sendEmail = async (to, subject, html) => {
   try {
     const info = await transporter.sendMail({
-      from: `"Tu App 👋" <${process.env.SMTP_USER}>`,
+      from: `"<${process.env.WEBSITE_NAME}> 👋" <${process.env.SMTP_USER}>`,
       to,
       subject,
       html,

@@ -35,7 +35,6 @@ function ArticleForm({
   imageInputRef,
   handleImageChange,
   handleImageUpload,
-  articlesAmount,
   imageData,
   isUploadingImage,
   handleSubmit,
@@ -47,6 +46,9 @@ function ArticleForm({
   cancelEditArticle,
   handleSubmitEdit,
 }) {
+  // -------------------
+  //      📦 State
+  // -------------------
   const [bannerPreview, setBannerPreview] = useState(null);
 
   // -------------------
@@ -62,21 +64,14 @@ function ArticleForm({
     basePaginationCategories + categoriesPerPage
   );
 
+  // -------------------
+  //    🖐️ Handlers
+  // -------------------
   const handleCategoryPageChange = (newPage) => {
     setCategoriesCurrentPage(newPage);
     const newBase = (newPage - 1) * categoriesPerPage;
     setBasePaginationCategories(newBase);
   };
-
-  useEffect(() => {
-    if (isEditing && formData.banner) {
-      setBannerPreview(
-        typeof formData.banner === "string"
-          ? `${BACKEND_URL}${formData.banner}`
-          : null
-      );
-    }
-  }, [isEditing, formData.banner]);
 
   const handleFormSubmit = (e) => {
     e.preventDefault();
@@ -107,6 +102,9 @@ function ArticleForm({
     onChange(e);
   };
 
+  //  -------------------
+  //   Markdown Insertion
+  //  -------------------
   const insertMarkdown = (before, after = "") => {
     const textarea = document.getElementById("content");
     const start = textarea.selectionStart;
@@ -132,7 +130,6 @@ function ArticleForm({
       textarea.selectionEnd = start + before.length + selectedText.length;
     }, 0);
   };
-
   const markdownButtons = [
     {
       icon: Bold,
@@ -160,6 +157,28 @@ function ArticleForm({
       onClick: () => insertMarkdown("\n- ", ""),
     },
   ];
+
+  // -------------------
+  //     📄 Effects
+  // -------------------
+  useEffect(() => {
+    if (isEditing && formData.banner) {
+      setBannerPreview(
+        typeof formData.banner === "string"
+          ? `${BACKEND_URL}${formData.banner}`
+          : null
+      );
+    }
+  }, [isEditing, formData.banner]);
+
+  useEffect(() => {
+    if (categoriesCurrentPage > categoriesTotalPages) {
+      setCategoriesCurrentPage((prev) => (prev > 1 ? prev - 1 : 1));
+      setBasePaginationCategories((prev) =>
+        prev > categoriesPerPage ? prev - categoriesPerPage : 0
+      );
+    }
+  }, [categoriesTotalPages]);
 
   return (
     <div className="w-full mx-auto">

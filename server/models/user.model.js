@@ -23,6 +23,10 @@ const User = sequelize.define(
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
+    banned: { // Whether the user is banned
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
     password: { // Hashed password
       type: DataTypes.STRING,
       allowNull: false,

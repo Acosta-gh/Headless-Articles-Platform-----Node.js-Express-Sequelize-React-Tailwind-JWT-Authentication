@@ -69,7 +69,7 @@ function AllArticles() {
   //     🖥️ Render
   // -------------------
   return (
-    <div className="mx-auto p-8 ">
+    <div className="mx-auto p-8 min-h-[55vh]">
       <Fade cascade triggerOnce duration={500}>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 ">
           <Fade  cascade damping={0.05} triggerOnce duration={700}>

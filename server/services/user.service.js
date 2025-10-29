@@ -1,24 +1,33 @@
-const { User } = require("@/models/index"); 
+const { User } = require("@/models/index");
 
-const { toSafeUser } = require("@/utils/toSafeUser"); 
+const { toSafeUser } = require("@/utils/toSafeUser");
 
-const saltRounds = parseInt(process.env.SALT_ROUNDS, 10) || 10; 
-const bcrypt = require("bcrypt"); 
+const saltRounds = parseInt(process.env.SALT_ROUNDS, 10) || 10;
+const bcrypt = require("bcrypt");
 
-const { jwtSecret, jwtExpiration } = require("@/configs/auth"); 
-const jwt = require("jsonwebtoken"); 
+const { jwtSecret, jwtExpiration } = require("@/config/auth");
+const jwt = require("jsonwebtoken");
 
 const { verifyEmail } = require("@/utils/templates/verifyEmail");
 const { sendEmail } = require("@/utils/emailUtils");
 
-const EMAIL_SECRET_KEY = process.env.EMAIL_SECRET_KEY || "your_email_secret_key";
+const EMAIL_SECRET_KEY =
+  process.env.EMAIL_SECRET_KEY || "your_email_secret_key";
 
 const registerUser = async (data) => {
   try {
-    const existingUser = await User.findOne({ where: { email: data.email } });
+    const existingEmail = await User.findOne({ where: { email: data.email } });
 
-    if (existingUser) {
+    if (existingEmail) {
       throw new Error("Email already in use");
+    }
+
+    const existingUsername = await User.findOne({
+      where: { username: data.username },
+    });
+
+    if (existingUsername) {
+      throw new Error("Username already in use");
     }
 
     const hashedPassword = await bcrypt.hash(data.password, saltRounds);
@@ -27,6 +36,7 @@ const registerUser = async (data) => {
       password: hashedPassword,
       admin: false,
       verified: false,
+      banned: false,
     });
 
     const safeUser = toSafeUser(user);
@@ -34,7 +44,9 @@ const registerUser = async (data) => {
       expiresIn: jwtExpiration,
     });
 
-    const emailToken = jwt.sign({ id: user.id }, EMAIL_SECRET_KEY, { expiresIn: "1d" });
+    const emailToken = jwt.sign({ id: user.id }, EMAIL_SECRET_KEY, {
+      expiresIn: "1d",
+    });
     const verificationLink = `${process.env.FRONTEND_URL}/verify?token=${emailToken}`;
     const html = verifyEmail(user.name, verificationLink);
     await sendEmail(user.email, "Verify your email", html);
@@ -51,16 +63,23 @@ const loginUser = async (data) => {
     const user = await User.findOne({ where: { email: data.email } });
 
     if (!user) {
-      return { error: "User not found" }; 
+      return { error: "User not found" };
+    }
+
+    if (user.banned) {
+      return { error: "User is banned. Contact support for more information." };
     }
 
     const isPasswordValid = await bcrypt.compare(data.password, user.password);
     if (!isPasswordValid) {
-      return { error: "Incorrect password"}; 
+      return { error: "Incorrect password" };
     }
 
     if (!user.verified) {
-      return { error: "Email not verified. Please check your inbox.", user: toSafeUser(user) }; 
+      return {
+        error: "Email not verified. Please check your inbox.",
+        user: toSafeUser(user),
+      };
     }
 
     const token = jwt.sign({ id: user.id, admin: user.admin }, jwtSecret, {
@@ -74,11 +93,10 @@ const loginUser = async (data) => {
   }
 };
 
-
 const getAllUsers = async () => {
   try {
     const users = await User.findAll();
-    const safeUsers = users.map(user => toSafeUser(user));
+    const safeUsers = users.map((user) => toSafeUser(user));
     return safeUsers;
   } catch (error) {
     throw new Error("Error fetching users: " + error.message);
@@ -104,6 +122,29 @@ const updateUser = async (id, data) => {
     if (!user) {
       throw new Error("User not found");
     }
+
+    if (data.email) {
+      const existingEmail = await User.findOne({
+        where: { email: data.email },
+      });
+      if (existingEmail) {
+        throw new Error("Email already in use");
+      }
+    }
+
+    if (data.username) {
+      const existingUsername = await User.findOne({
+        where: { username: data.username },
+      });
+      if (existingUsername) {
+        throw new Error("Username already in use");
+      }
+    }
+
+    if (user.admin && data.banned) {
+      throw new Error("Cannot ban an admin user");
+    }
+
     await user.update(data);
 
     return toSafeUser(user);

@@ -32,7 +32,24 @@ async function resendVerificationEmail(req, res) {
   }
 } 
 
+async function verifySubscriberEmail(req, res) {
+  console.log("Verify subscriber email request query:", req.query);
+  const { token } = req.query;
+  if (!token) {
+    return res.status(400).json({ error: "Verification token is required" });
+  }
+
+  try {
+    const result = await verifyService.verifySubscriberEmail(token);
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error("Error verifying subscriber email:", error);
+    return res.status(400).json({ error: error.message });
+  }
+} 
+
 module.exports = {
   verifyEmail,
   resendVerificationEmail,
+  verifySubscriberEmail,
 };

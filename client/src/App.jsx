@@ -14,7 +14,8 @@ const Home = lazy(() => import("./pages/Home"));
 const About = lazy(() => import("./pages/About"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
-const Admin = lazy(() => import("./pages/AdminPanel"));
+const Admin = lazy(() => import("./pages/AdminPanel")); // Even though it's called AdminPanel it only handles articles.
+const AdminUsers = lazy(() => import("./pages/AdminUsers"));
 const SignUpPage = lazy(() => import("./pages/SignUpPage"));
 const Profile = lazy(() => import("./pages/Profile"));
 const Loading = lazy(() => import("./components/Loading.jsx"));
@@ -25,7 +26,7 @@ const AllArticles = lazy(() => import("./pages/AllArticles.jsx"));
 
 // 🔐 Protected Routes
 function ProtectedRoute({ children, requireAdmin = false }) {
-  const { isAuthenticated, isAdmin } = useAuth(); 
+  const { isAuthenticated, isAdmin } = useAuth();
 
   if (!isAuthenticated()) {
     return <Navigate to="/login" replace />;
@@ -79,11 +80,21 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "/admin",
+        path: "/manageArticles",
         element: (
           <ProtectedRoute requireAdmin={true}>
             <Suspense fallback={<Loading />}>
               <Admin />
+            </Suspense>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/adminUsers",
+        element: (
+          <ProtectedRoute requireAdmin={true}>
+            <Suspense fallback={<Loading />}>
+              <AdminUsers />
             </Suspense>
           </ProtectedRoute>
         ),
@@ -103,7 +114,7 @@ const router = createBrowserRouter([
             <AllArticles />
           </Suspense>
         ),
-      }
+      },
     ],
   },
   {
@@ -130,7 +141,7 @@ const router = createBrowserRouter([
       </Suspense>
     ),
   },
-  { 
+  {
     path: "*",
     element: (
       <Suspense fallback={<Loading />}>

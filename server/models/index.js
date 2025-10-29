@@ -5,6 +5,7 @@ const { Comment } = require('@/models/comment.model');
 const { Like } = require('@/models/like.model');
 const { Bookmark } = require('@/models/bookmark.model');
 const { Category } = require('@/models/category.model');
+const { Subscriber } = require('@/models/subscriber.model');
 
 // =====================
 // User ↔ Article
@@ -94,5 +95,6 @@ module.exports = {
   Comment,
   Like,
   Bookmark,
-  Category
+  Category,
+  Subscriber
 };

@@ -10,12 +10,16 @@ const {
   Category,
   Like,
   Image,
-  Comment
+  Comment,
+  Subscriber,  
 } = require("@/models/index");
 const { adoptTempImages } = require("@/utils/imageUtils");
 const { transformArticle } = require("@/utils/dataTransformers"); 
 const fs = require("fs");
 const path = require("path");
+
+const { newArticleNotification } = require("@/utils/templates/newArticleNotification");
+const { sendEmail } = require("@/utils/emailUtils");
 
 const createArticle = async (data) => {
   try {
@@ -30,6 +34,21 @@ const createArticle = async (data) => {
     }
 
     await adoptTempImages(tempId, article.id);
+
+    setImmediate(async () => {
+      try {
+        const subscribers = await Subscriber.findAll({ where: { verified: true } });
+        const articleLink = `${process.env.FRONTEND_URL}/article/${article.id}`;
+        const html = newArticleNotification(articleLink, article.title);
+
+        for (const sub of subscribers) {
+          await sendEmail(sub.email, "New Article Published!", html);
+        }
+      } catch (error) {
+        console.error("Error sending article notifications:", error);
+      }
+    });
+
     return article.get({ plain: true });
   } catch (error) {
     throw new Error("Error creating article: " + error.message);

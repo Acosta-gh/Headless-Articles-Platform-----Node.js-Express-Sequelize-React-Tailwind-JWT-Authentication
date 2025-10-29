@@ -21,7 +21,7 @@ async function loginUser(req, res) {
 }
 
 async function getAllUsers(req, res) {
-  try{
+  try {
     const users = await userService.getAllUsers();
     return res.status(200).json(users);
   } catch (error) {
@@ -43,12 +43,31 @@ async function getUserById(req, res) {
 }
 
 async function updateUser(req, res) {
+  console.log(
+    "Update user request for ID:",
+    req.params.id,
+    "with data:",
+    req.body
+  );
   try {
     const user = await userService.updateUser(req.params.id, req.body);
     if (!user) return res.status(404).json({ error: "User not found" });
     return res.status(200).json(user);
   } catch (error) {
     console.error("Update user error:", error);
+    // Specific error handling
+    if (
+      error.message.includes("Username already in use") ||
+      error.message.includes("Email already in use")
+    ) {
+      return res.status(400).json({ error: error.message });
+    }
+    if (error.message.includes("Cannot ban an admin user")) {
+      return res.status(403).json({ error: error.message });
+    }
+    if (error.message.includes("User not found")) {
+      return res.status(404).json({ error: error.message });
+    }
     return res.status(500).json({ error: "Internal server error" });
   }
 }

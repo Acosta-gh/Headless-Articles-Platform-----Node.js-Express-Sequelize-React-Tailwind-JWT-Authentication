@@ -68,7 +68,9 @@ const Home = () => {
   //      🧠 Memos
   // -------------------
   const featuredArticles = useMemo(() => {
-    return articles.filter((article) => article.featured);
+    return articles
+      .filter((article) => article.featured)
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   }, [articles]);
 
   const mainFeaturedArticle = featuredArticles[0];
@@ -105,7 +107,7 @@ const Home = () => {
   // -------------------
   if (!articles || (articles.length === 0 && !loading)) {
     return (
-      <div className="container mx-auto px-4 py-8 md:px-6 lg:px-8">
+      <div className="min-h-[70vh] flex items-center justify-center mb-20">
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <h2 className="text-2xl font-bold mb-2">No Articles Available</h2>
           <p className="text-muted-foreground">

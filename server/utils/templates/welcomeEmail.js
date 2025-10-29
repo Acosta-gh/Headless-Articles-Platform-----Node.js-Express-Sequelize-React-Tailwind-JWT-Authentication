@@ -1,9 +1,9 @@
 export const welcomeEmail = (name) => `
   <div style="font-family: Arial, sans-serif; color: #333;">
-    <h2>¡Bienvenido/a! 👋</h2>
-    <p>Gracias por registrarte en <strong>Tu App</strong>.</p>
-    <p>Esperamos que disfrutes tu experiencia.</p>
+    <h2>Welcome! 👋</h2>
+    <p>Thank you for signing up for <strong>FOSS NEWS</strong>.</p>
+    <p>We hope you enjoy your experience.</p>
     <br/>
-    <p>— El equipo de Tu App</p>
+    <p>— The FOSS NEWS Team</p>
   </div>
 `;

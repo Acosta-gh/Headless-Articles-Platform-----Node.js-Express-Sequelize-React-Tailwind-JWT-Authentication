@@ -47,7 +47,18 @@ async function createImage(req, res) {
   }
 }
 
+async function destroyImage(req, res) {
+  try {
+    await deleteImageById(req.params.id);
+    return res.status(204).send();
+  } catch (error) {
+    console.error("Error deleting image:", error);
+    return res.status(500).json({ error: error.message });
+  }
+}
+
 module.exports = {
   createImage,
   getAllImages,
+  destroyImage,
 };

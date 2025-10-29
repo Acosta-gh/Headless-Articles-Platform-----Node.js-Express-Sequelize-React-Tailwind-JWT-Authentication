@@ -1,14 +1,17 @@
+import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import {
-  GithubIcon,
-  TwitterIcon,
-  Shell,
-} from "lucide-react";
-
+import { GithubIcon, TwitterIcon, Shell } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
 import { Link } from "react-router-dom";
 
+import { useNewsletter } from "@/hooks/useNewsletter";
+
+// -------------------
+//      🎲 Data
+// -------------------
 const footerLinks = [
   {
     title: "Home",
@@ -25,6 +28,36 @@ const footerLinks = [
 ];
 
 const Footer = () => {
+  // -------------------
+  //      🎣 Hooks
+  // -------------------
+  const { toggleSubscription, loading } = useNewsletter();
+
+  // -------------------
+  //      📦 State
+  // -------------------
+  const [form, setForm] = useState({});
+
+  // -------------------
+  //     🖐️ Handlers
+  // -------------------
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const data = new FormData(e.target);
+    data.append("email", form.email);
+    try {
+      await toggleSubscription(form.email);
+    } catch (error) {
+      console.error("Error subscribing to newsletter:", error);
+    }
+    setForm({});
+  };
+
   return (
     <div className="bg-muted flex flex-col">
       <div className="grow bg-muted" />
@@ -55,14 +88,24 @@ const Footer = () => {
             {/* Newsletter */}
             <div className="max-w-xs w-full min-h-[200px]">
               <h6 className="font-medium">Subscribe to our newsletter</h6>
-              <form className="mt-6 flex items-center gap-2 bg-background">
-                <Input type="email" placeholder="Your email address" />
-                <Button disabled className="opacity-50 cursor-not-allowed">
-                  Coming soon
+              <form
+                className="mt-6 flex items-center gap-2 "
+                onSubmit={handleSubmit}
+              >
+                <Input
+                  type="email"
+                  name="email"
+                  placeholder="Your email address"
+                  className="bg-background"
+                  value={form.email || ""}
+                  onChange={handleChange}
+                />
+                <Button type="submit">
+                  {loading ? <Spinner className="h-4 w-4" /> : "Subscribe"}
                 </Button>
               </form>
               <p className="text-xs text-muted-foreground mt-2">
-                You’ll soon be able to subscribe for the latest updates.
+                Subscribe to receive the latest news articles directly in your inbox.
               </p>
             </div>
           </div>
@@ -71,19 +114,32 @@ const Footer = () => {
             {/* Copyright */}
             <span className="text-muted-foreground">
               &copy; {new Date().getFullYear()}{" "}
-              <Link to="/" className="hover:underline text-foreground font-semibold">
+              <Link
+                to="/"
+                className="hover:underline text-foreground font-semibold"
+              >
                 FOSS News
               </Link>
               . All rights reserved.
             </span>
+            {/* Social Media 
             <div className="flex items-center gap-5 text-muted-foreground">
-              <a href="https://twitter.com/" target="_blank" rel="noopener noreferrer">
+              <a
+                href="https://twitter.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <TwitterIcon className="h-5 w-5" />
               </a>
-              <a href="https://github.com/" target="_blank" rel="noopener noreferrer">
+              <a
+                href="https://github.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <GithubIcon className="h-5 w-5" />
               </a>
             </div>
+            */}
           </div>
         </div>
       </footer>

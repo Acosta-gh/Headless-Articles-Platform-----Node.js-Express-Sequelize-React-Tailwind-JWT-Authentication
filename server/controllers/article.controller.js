@@ -26,13 +26,18 @@ async function createArticle(req, res) {
       bannerPath = `/uploads/${req.file.filename}`;
     }
 
-    const { title, content, tempId } = req.body;
+    const { title, content, tempId, featured } = req.body;
+
+    // Convert featured to boolean in case it's sent as a string because of form data
+    const isFeatured = featured === "true" || featured === true;
+
     const article = await articleService.createArticle({
       authorId,
       title,
       content,
       banner: bannerPath,
       tempId,
+      featured: isFeatured,
       categoryIds,
     });
     return res.status(201).json(article);

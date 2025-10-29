@@ -14,9 +14,9 @@ export const useProfile = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  /* 
-  * Fetch user profile data
-  */
+  /*
+   * Fetch user profile data
+   */
   const fetchProfile = useCallback(async () => {
     if (!token) return;
     setLoading(true);
@@ -34,6 +34,19 @@ export const useProfile = () => {
         toast.error("Rate limit exceeded. Please try again later.");
       } else {
         setError(error);
+        const errorMessage =
+          error.response?.data?.error ||
+          error.response?.data?.message ||
+          error.message ||
+          "An error occurred";
+
+        toast.error(errorMessage, {
+          duration: 3000,
+          action: {
+            label: "Close",
+            onClick: () => {},
+          },
+        });
       }
     } finally {
       setLoading(false);
@@ -54,9 +67,24 @@ export const useProfile = () => {
           profileData,
           token
         );
+        console.log("Profile updated on backend:", updatedProfile);
         setProfile(updatedProfile);
         return updatedProfile;
       } catch (error) {
+        const errorMessage =
+          error.response?.data?.error ||
+          error.response?.data?.message ||
+          error.message ||
+          "An error occurred";
+
+        toast.error(errorMessage, {
+          duration: 3000,
+          action: {
+            label: "Close",
+            onClick: () => {},
+          },
+        });
+
         setError(error);
         throw error;
       } finally {

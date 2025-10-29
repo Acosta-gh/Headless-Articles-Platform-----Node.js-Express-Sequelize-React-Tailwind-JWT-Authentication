@@ -1,12 +1,14 @@
 require("dotenv").config();
 require("module-alias/register");
 
+require('@/tasks/cleanupImages'); // Import the cleanup task
 const { User } = require("@/models/index"); // Import User model
 
 const app = require("./app");
 const { connectToDatabase } = require("@/services/database.service");
 
 const PORT = process.env.PORT || 3001;
+const URL = process.env.BACKEND_URL || `http://localhost:${PORT}`;
 
 (async () => {
   try {
@@ -27,10 +29,10 @@ const PORT = process.env.PORT || 3001;
       });
       console.log("✅ Admin user created");
     } else {
-      console.log("ℹ️ Admin user already exists");
+      console.log("ℹ️  Admin user already exists");
     }
     app.listen(PORT, () =>
-      console.log(`🚀 Server is running at http://localhost:${PORT}`)
+      console.log(`🚀 Server is running at ${URL || `http://localhost:${PORT}`}`)
     );
   } catch (error) {
     console.error("💥 The server failed to start:", error);

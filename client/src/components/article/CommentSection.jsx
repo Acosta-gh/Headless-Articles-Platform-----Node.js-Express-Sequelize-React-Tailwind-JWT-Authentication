@@ -7,6 +7,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Heart, MessageCircle, Send, Trash } from "lucide-react";
 import { toast } from "sonner";
 
+import { useAuth } from "@/hooks/useAuth";
+
 function CommentSection({
   comments = [],
   onAddComment,
@@ -21,6 +23,7 @@ function CommentSection({
   const [newComment, setNewComment] = useState("");
   const [replyingTo, setReplyingTo] = useState(null);
   const [newReply, setNewReply] = useState("");
+  const { isAdmin } = useAuth();
 
   const handleSetReplyingTo = (commentId) => {
     setNewReply("");
@@ -132,7 +135,7 @@ function CommentSection({
                           {new Date(comment.createdAt).toLocaleString()}
                         </p>
                       </div>
-                      {isOwner(comment.user?.id) && (
+                      {(isOwner(comment.user?.id) || isAdmin) && (
                         <span className="text-sm font-medium text-primary flex-shrink-0">
                           <Button
                             variant="ghost"
@@ -234,7 +237,7 @@ function CommentSection({
                                     {new Date(reply.createdAt).toLocaleString()}
                                   </p>
                                 </div>
-                                {isOwner(reply.user?.id) && (
+                                {(isOwner(comment.user?.id) || isAdmin) && (
                                   <span className="text-sm font-medium text-primary flex-shrink-0">
                                     <Button
                                       variant="ghost"

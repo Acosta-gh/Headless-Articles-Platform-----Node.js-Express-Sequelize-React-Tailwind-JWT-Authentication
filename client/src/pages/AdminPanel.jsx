@@ -153,6 +153,22 @@ function AdminPanel() {
     }
   }, [tempId]);
 
+  // Reset pagination if total pages decrease
+  useEffect(() => {
+    if (categoriesCurrentPage > categoriesTotalPages) {
+      setCategoriesCurrentPage((prev) => (prev > 1 ? prev - 1 : 1));
+      setBasePaginationCategories((prev) =>
+        prev > 0 ? prev - categoriesPerPage : 0
+      );
+    }
+    if (articlesCurrentPage > articlesTotalPages) {
+      setArticlesCurrentPage((prev) => (prev > 1 ? prev - 1 : 1));
+      setBasePaginationArticles((prev) =>
+        prev > 0 ? prev - articlesPerPage : 0
+      );
+    }
+  }, [categoriesTotalPages, articlesTotalPages]);
+
   // -------------------
   //    ✋ Handlers
   // -------------------
@@ -305,7 +321,7 @@ function AdminPanel() {
       data.append("title", formData.title);
       data.append("content", formData.content);
       data.append("tempId", formData.tempId);
-      data.append("featured", formData.featured);
+      data.append("featured", formData.featured ? "true" : "false");
 
       if (formData.banner) {
         data.append("banner", formData.banner);
@@ -405,7 +421,6 @@ function AdminPanel() {
     if (window.confirm("Are you sure you want to delete this article?")) {
       try {
         await deleteArticle(id);
-        toast.success("Article deleted successfully");
         fetchArticles?.();
       } catch (error) {
         console.error("Error deleting article:", error);
@@ -493,10 +508,6 @@ function AdminPanel() {
   return (
     <div className="p-4 space-y-6 max-w-7xl mx-auto">
       <Fade cascade damping={0.05} triggerOnce duration={400}>
-        <h2 className="flex items-center gap-2 text-2xl font-bold justify-center">
-          <span>Admin Panel</span>
-        </h2>
-
         <ErrorAlert
           tempIdError={tempIdError}
           articleError={articleError}

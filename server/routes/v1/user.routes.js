@@ -35,7 +35,7 @@ router.post("/register", registerUser);
 // User login
 router.post("/login", loginUser);
 // Get all users (admin only)
-router.get("/", isAdmin, getAllUsers);
+router.get("/", verifyJWT, isAdmin, getAllUsers);
 // Get, update, and delete a specific user by ID (owner only)
 router.get(
   "/:id",
@@ -48,7 +48,7 @@ router.get(
 router.put(
   "/:id",
   verifyJWT,
-  authorizeOwner(async (req) => User.findByPk(req.params.id)),
+  authorizeOwner(async (req) => User.findByPk(req.params.id), true),
   updateUser
 );
 // Delete a specific user by ID

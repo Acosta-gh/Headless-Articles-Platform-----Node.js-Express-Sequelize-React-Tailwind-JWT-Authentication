@@ -4,12 +4,19 @@ const router = express.Router();
 // ======================================================================
 //                   📧 Verify Controllers
 // ======================================================================
-const { verifyEmail, resendVerificationEmail} = require("@/controllers/verify.controller");
+const {
+  verifyEmail,
+  verifySubscriberEmail,
+  resendVerificationEmail,
+} = require("@/controllers/verify.controller");
 
 // ======================================================================
 //            🔐 Rate Limiting Middlewares
 // ======================================================================
-const {verifyLimiter, resendLimiter} = require("@/middlewares/rateLimit.middleware");
+const {
+  verifyLimiter,
+  resendLimiter,
+} = require("@/middlewares/rateLimit.middleware");
 
 // ======================================================================
 //                      📧 Verify Routes
@@ -18,5 +25,7 @@ const {verifyLimiter, resendLimiter} = require("@/middlewares/rateLimit.middlewa
 router.post("/resend", resendLimiter, resendVerificationEmail);
 // Resend verification email
 router.post("/", verifyLimiter, verifyEmail);
+// Verify subscriber email
+router.post("/subscriber", verifyLimiter, verifySubscriberEmail);
 
 module.exports = router;

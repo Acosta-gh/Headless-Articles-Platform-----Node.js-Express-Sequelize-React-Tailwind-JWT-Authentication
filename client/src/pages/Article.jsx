@@ -36,7 +36,7 @@ function Article() {
   const [commentAmount, setCommentAmount] = useState(0);
 
   // -------------------
-  //      🎣 Hooks
+  //      🪝 Hooks
   // -------------------
   const {
     getArticle,

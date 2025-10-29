@@ -6,7 +6,7 @@ import { CheckCircle2, Loader2, XCircle } from "lucide-react";
 
 function Verify() {
   // -------------------
-  //      🎣 Hooks
+  //      🪝 Hooks
   // -------------------  
   const { loading, error, success, verifyEmail } = useVerify();
 

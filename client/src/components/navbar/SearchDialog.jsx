@@ -18,7 +18,7 @@ import { useSearch } from "@/context/SearchContext";
 
 function SearchDialog() {
   // -------------------
-  //     🎣 Hooks
+  //     🪝 Hooks
   // -------------------
   const { articles, loading } = useArticles();
   const { searchTerm, setSearchTerm } = useSearch();

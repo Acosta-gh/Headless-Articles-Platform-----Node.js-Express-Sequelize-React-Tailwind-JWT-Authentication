@@ -9,7 +9,7 @@ import { useSearchParams } from "react-router-dom";
 
 function AllArticles() {
   // -------------------
-  //      🎣 Hooks
+  //      🪝 Hooks
   // -------------------
   const { articles, loading } = useArticles();
 

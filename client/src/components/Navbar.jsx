@@ -20,7 +20,7 @@ import SearchDialog from "./navbar/SearchDialog.jsx";
 
 function Navbar() {
   // -------------------
-  //      🎣 Hooks
+  //      🪝 Hooks
   // -------------------
   const navigate = useNavigate();
   const location = useLocation();

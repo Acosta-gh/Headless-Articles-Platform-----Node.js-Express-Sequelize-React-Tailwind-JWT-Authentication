@@ -31,7 +31,7 @@ import { Fade } from "react-awesome-reveal";
 
 function AdminPanel() {
   // -------------------
-  //      🎣 Hooks
+  //      🪝 Hooks
   // -------------------
   const { token, isAuthenticated } = useAuth();
 

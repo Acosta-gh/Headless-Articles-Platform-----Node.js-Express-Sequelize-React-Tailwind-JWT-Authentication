@@ -40,7 +40,7 @@ import { Link } from "react-router-dom";
 
 const Home = () => {
   // -------------------
-  //      🎣 Hooks
+  //      🪝 Hooks
   // -------------------
   const { articles, loading } = useArticles();
 

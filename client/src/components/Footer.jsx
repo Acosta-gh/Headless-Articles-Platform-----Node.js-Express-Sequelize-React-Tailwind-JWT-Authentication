@@ -29,7 +29,7 @@ const footerLinks = [
 
 const Footer = () => {
   // -------------------
-  //      🎣 Hooks
+  //      🪝 Hooks
   // -------------------
   const { toggleSubscription, loading } = useNewsletter();
 

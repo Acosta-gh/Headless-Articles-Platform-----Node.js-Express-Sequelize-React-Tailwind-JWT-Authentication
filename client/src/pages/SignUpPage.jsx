@@ -16,7 +16,7 @@ const SignUpPage = ({
   redirectUrl = "/login",
 }) => {
   // -------------------
-  //      🎣 Hooks
+  //      🪝 Hooks
   // -------------------
   const navigate = useNavigate();
   const { register, loading } = useAuth();

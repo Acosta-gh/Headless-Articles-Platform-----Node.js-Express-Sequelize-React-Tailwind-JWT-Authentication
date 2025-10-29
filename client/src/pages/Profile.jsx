@@ -38,7 +38,7 @@ function Profile() {
   const [isEditing, setIsEditing] = React.useState(false);
 
   // -------------------
-  //      🎣 Hooks
+  //      🪝 Hooks
   // -------------------
   const { isAuthenticated, isAdmin, logout } = useAuth();
   const { profile, setProfile, loading, error, updateProfile } = useProfile();

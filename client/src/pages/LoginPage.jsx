@@ -15,7 +15,7 @@ const LoginPage = ({
   redirectUrl = "/profile",
 }) => {
   // -------------------
-  //      🎣 Hooks
+  //      🪝 Hooks
   // -------------------
   const navigate = useNavigate();
   const { login, loading } = useAuth();

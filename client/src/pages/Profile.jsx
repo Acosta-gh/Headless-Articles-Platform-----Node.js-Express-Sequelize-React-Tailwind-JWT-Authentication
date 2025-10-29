@@ -144,7 +144,7 @@ function Profile() {
               </p>
             </div>
           </CardHeader>
-          <CardFooter className="flex justify-center gap-4">
+          <CardFooter className="flex flex-col md:flex-row justify-center gap-4">
             {isAdmin && !isEditing && (
               <Link to="/manageArticles">
                 <Button variant="outline" className="cursor-pointer">

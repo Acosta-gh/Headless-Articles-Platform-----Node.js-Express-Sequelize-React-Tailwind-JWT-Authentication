@@ -1,3 +1,9 @@
+/*
+* ========================================================================================
+* ⚠️ This file's code was generated partially or completely by a Large Language Model (LLM).
+* ========================================================================================
+*/
+
 const cron = require("node-cron");
 const { Op } = require("sequelize");
 const { Image } = require("@/models/index");

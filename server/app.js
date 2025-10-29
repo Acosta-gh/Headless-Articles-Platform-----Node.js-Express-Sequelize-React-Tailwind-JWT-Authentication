@@ -1,4 +1,3 @@
-// server/app.js
 const express = require('express');
 const cors = require('cors');
 const routesV1 = require('@/routes/v1');

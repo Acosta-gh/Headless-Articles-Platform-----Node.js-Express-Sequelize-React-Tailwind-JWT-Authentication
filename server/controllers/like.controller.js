@@ -11,16 +11,7 @@ async function createLike(req, res) {
   }
 }
 
-async function getLikesByArticleId(req, res) {
-  try {
-    const likes = await likeService.getLikesByArticleId(req.query.articleId);
-    return res.status(200).json(likes);
-  } catch (error) {
-    return res.status(500).json({ error: error.message });
-  }
-}
 
 module.exports = {
   createLike,
-  getLikesByArticleId,
 };  

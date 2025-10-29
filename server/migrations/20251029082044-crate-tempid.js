@@ -14,7 +14,7 @@ module.exports = {
       createdAt: { allowNull: false, type: Sequelize.DATE, defaultValue: Sequelize.NOW }
     });
   },
-  down: async (queryInterface, Sequelize) => {
+  down: async (queryInterface) => {
     await queryInterface.dropTable('TempIds');
   }
 };

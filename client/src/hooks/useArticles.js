@@ -64,7 +64,7 @@ export const useArticles = () => {
     try {
       const article = await getArticleById(id);
 
-      console.log("Fetched article data:", article);
+      //console.log("Fetched article data:", article);
       setIndividualArticle(article);
     } catch (error) {
       setError(error);

@@ -228,6 +228,10 @@ function CommentSection({
                             <div className="flex-1 min-w-0 space-y-1">
                               <div className="flex items-center justify-between gap-2  w-full">
                                 <div className="min-w-0">
+                                  {console.log(
+                                    "Reply User ID:", reply.user?.id,
+                                    "Is Owner:", isOwner(reply.user?.id)
+                                  )}
                                   <p className="font-medium truncate">
                                     {isOwner(reply.user?.id)
                                       ? "You"
@@ -237,7 +241,7 @@ function CommentSection({
                                     {new Date(reply.createdAt).toLocaleString()}
                                   </p>
                                 </div>
-                                {(isOwner(comment.user?.id) || isAdmin) && (
+                                {(isOwner(reply.user?.id) || isAdmin) && (
                                   <span className="text-sm font-medium text-primary flex-shrink-0">
                                     <Button
                                       variant="ghost"

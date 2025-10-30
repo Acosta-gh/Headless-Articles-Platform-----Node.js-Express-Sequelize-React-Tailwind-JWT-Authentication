@@ -48,6 +48,7 @@ const registerUser = async (data) => {
       expiresIn: "1d",
     });
     const verificationLink = `${process.env.FRONTEND_URL}/verify?token=${emailToken}`;
+    console.log("Verification Link:", verificationLink);
     const html = verifyEmail(user.name, verificationLink);
     await sendEmail(user.email, "Verify your email", html);
 

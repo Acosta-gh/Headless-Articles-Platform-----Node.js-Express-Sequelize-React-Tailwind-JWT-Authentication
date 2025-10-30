@@ -78,6 +78,7 @@ const resendVerificationEmail = async (email) => {
       expiresIn: "1d",
     });
     const verificationLink = `${process.env.FRONTEND_URL}/verify?token=${emailToken}`;
+    
     const html = verifyEmail(user.name, verificationLink);
     await sendEmail(user.email, "Verify your email", html);
 

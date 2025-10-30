@@ -2,6 +2,22 @@
 
 **Versión 1.0.0**
 
+<img width="427" height="897" alt="Image" src="https://github.com/user-attachments/assets/65a22b21-539a-4d82-b2c6-d82f8edc804c" />
+<img width="427" height="897" alt="Image" src="https://github.com/user-attachments/assets/b70fb043-cc4e-4824-a9a8-0a5ff48f53e8" />
+<img width="427" height="897" alt="Image" src="https://github.com/user-attachments/assets/6ac149ce-6d0b-4ab8-9080-211839188d53" />
+<img width="430" height="927" alt="Image" src="https://github.com/user-attachments/assets/bfc617d5-b200-4839-97c4-929795258825" />
+<img width="427" height="897" alt="Image" src="https://github.com/user-attachments/assets/ac9f5c1b-1d20-4726-8439-4d2cded53aad" />
+<img width="430" height="927" alt="Image" src="https://github.com/user-attachments/assets/1645ee22-f19a-4eec-a143-e7e5e5a61770" />
+<img width="1920" height="965" alt="Image" src="https://github.com/user-attachments/assets/8a8ac0d9-61da-4d7e-bc3a-fbeb5772e03d" />
+<img width="1920" height="965" alt="Image" src="https://github.com/user-attachments/assets/dec3d434-73cc-459b-b5dd-74ca49fb430e" />
+<img width="1920" height="965" alt="Image" src="https://github.com/user-attachments/assets/1541d38c-fc67-4b7f-bba9-43becb65e909" />
+<img width="1920" height="965" alt="Image" src="https://github.com/user-attachments/assets/9a8a5d97-547f-41b2-9fbc-fe06098d7a16" />
+<img width="1920" height="965" alt="Image" src="https://github.com/user-attachments/assets/59070ff5-fcb2-4b12-a855-ac30e05f2b87" />
+<img width="1920" height="965" alt="Image" src="https://github.com/user-attachments/assets/0485af3d-d563-4e16-96b7-ae6e04757f32" />
+<img width="1920" height="965" alt="Image" src="https://github.com/user-attachments/assets/ad476756-6174-4991-a82b-951b270412d9" />
+<img width="1920" height="965" alt="Image" src="https://github.com/user-attachments/assets/311ee54b-c2f8-4c7f-a9c1-87e606f1ce4d" />
+<img width="1920" height="968" alt="Image" src="https://github.com/user-attachments/assets/f50b8f0f-2302-448f-b027-efb75f29197b" />
+
 
 ### 1. 🇪🇸 Readme versión en Español
 
@@ -10,6 +26,7 @@
 Este es un sitio web de artículos con arquitectura headless. Permite crear y administrar artículos en Markdown, subir imágenes, gestionar usuarios y mucho más. Es ideal como base para un blog moderno o una plataforma de contenido editorial.
 
 ---
+
 
 ## Características principales
 

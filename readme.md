@@ -117,8 +117,6 @@ Estos archivos están **claramente identificados** con un bloque al inicio como 
 */
 ```
 
-Revisa dichos archivos para más detalles sobre el alcance del uso de LLM en cada caso.
-
 ---
 
 ## Notas adicionales
@@ -226,8 +224,6 @@ These files are **clearly marked** with a block at the top like the following:
 * ========================================================================================
 */
 ```
-
-Check these files for more details on the extent of LLM usage in each case.
 
 ---
 

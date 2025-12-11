@@ -1,0 +1,1 @@
+import{j as e,v as r}from"./index-CQ3z68u0.js";import{F as t}from"./index-BPxRBQeQ.js";function i(){return e.jsx("div",{className:"flex h-screen w-full items-center justify-center relative bottom-24",children:e.jsx(t,{cascade:!0,triggerOnce:!0,duration:500,children:e.jsx(r,{className:"size-8"})})})}export{i as default};

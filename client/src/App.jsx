@@ -2,10 +2,11 @@ import { lazy, Suspense } from "react";
 import { useAuth } from "@/hooks/useAuth";
 
 import {
-  createBrowserRouter,
+  createHashRouter,
   RouterProvider,
   Navigate,
 } from "react-router-dom";
+
 
 import MainLayout from "@/layout/MainLayout";
 
@@ -40,7 +41,7 @@ function ProtectedRoute({ children, requireAdmin = false }) {
 }
 
 // ⚙️ Setup Router
-const router = createBrowserRouter([
+const router = createHashRouter([
   {
     path: "/",
     element: <MainLayout />,

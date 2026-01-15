@@ -1,23 +1,47 @@
 import React, { useEffect } from "react";
 import { useVerify } from "@/hooks/useVerify";
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, Loader2, XCircle } from "lucide-react";
 
 function Verify() {
   // -------------------
   //      🪝 Hooks
-  // -------------------  
+  // -------------------
   const { loading, error, success, verifyEmail } = useVerify();
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get("token");
-    if (token) verifyEmail(token);
+    let token = null;
+
+    //1. Intento leer token desde query params normales (BrowserRouter)
+    const searchParams = new URLSearchParams(window.location.search);
+    token = searchParams.get("token");
+
+    //2. Si no hay token, intento leer desde el hash (HashRouter)
+    if (!token) {
+      const hash = window.location.hash; // ej: "#/verify?token=XYZ"
+      const queryString = hash.includes("?")
+        ? hash.slice(hash.indexOf("?"))
+        : "";
+      const hashParams = new URLSearchParams(queryString);
+      token = hashParams.get("token");
+    }
+
+    console.log("Token detected:", token);
+
+    if (token) {
+      verifyEmail(token);
+    }
   }, [verifyEmail]);
 
   // -------------------
-  //     🖥️ Render 
+  //     🖥️ Render
   // -------------------
   return (
     <div className="flex items-center justify-center min-h-screen bg-muted/30">
@@ -32,7 +56,9 @@ function Verify() {
           {loading && (
             <div className="flex flex-col items-center space-y-2">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
-              <p className="text-muted-foreground">Please wait while we verify your email.</p>
+              <p className="text-muted-foreground">
+                Please wait while we verify your email.
+              </p>
             </div>
           )}
 
@@ -46,7 +72,9 @@ function Verify() {
           {success && (
             <div className="flex flex-col items-center space-y-2">
               <CheckCircle2 className="w-10 h-10 text-green-600" />
-              <p className="text-green-600 font-medium">Your email has been successfully verified!</p>
+              <p className="text-green-600 font-medium">
+                Your email has been successfully verified!
+              </p>
             </div>
           )}
         </CardContent>

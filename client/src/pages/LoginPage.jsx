@@ -11,7 +11,9 @@ const LoginPage = ({
   heading = "Login",
   buttonText = "Login",
   signupText = "Need an account?",
+  forgotText = "Forgot your credentials?",
   signupUrl = "/signup",
+  forgotUrl = "/forgot",
   redirectUrl = "/profile",
 }) => {
   // -------------------
@@ -108,6 +110,15 @@ const LoginPage = ({
                 className="text-primary font-medium hover:underline"
               >
                 Sign Up
+              </Link>
+            </div>
+            <div className="text-muted-foreground flex justify-center gap-1 text-sm">
+              <p>{forgotText}</p>
+              <Link
+                to={forgotUrl}
+                className="text-primary font-medium hover:underline"
+              >
+                Recover Account
               </Link>
             </div>
           </div>

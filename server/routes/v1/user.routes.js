@@ -4,14 +4,12 @@ const router = express.Router();
 // ======================================================================
 //                        🧑 User Model
 // ======================================================================
-const { User } = require("../../models/index");
+const { User } = require("@/models/index");
 
 // ======================================================================
 //                      🧑 User Controllers
 // ======================================================================
 const {
-  registerUser,
-  loginUser,
   getAllUsers,
   getUserById,
   deleteUser,
@@ -30,13 +28,10 @@ const { genericLimiter } = require("@/middlewares/rateLimit.middleware");
 //                      🧑 User Routes
 // ======================================================================
 
-// Create a new user (registration)
-router.post("/register", registerUser);
-// User login
-router.post("/login", loginUser);
 // Get all users (admin only)
 router.get("/", verifyJWT, isAdmin, getAllUsers);
-// Get, update, and delete a specific user by ID (owner only)
+
+// Get a specific user by ID (owner only)
 router.get(
   "/:id",
   verifyJWT,
@@ -44,14 +39,16 @@ router.get(
   authorizeOwner(async (req) => User.findByPk(req.params.id)),
   getUserById
 );
-// Update a specific user by ID
+
+// Update a specific user by ID (owner only, admin can update more fields)
 router.put(
   "/:id",
   verifyJWT,
   authorizeOwner(async (req) => User.findByPk(req.params.id), true),
   updateUser
 );
-// Delete a specific user by ID
+
+// Delete a specific user by ID (owner only)
 router.delete(
   "/:id",
   verifyJWT,

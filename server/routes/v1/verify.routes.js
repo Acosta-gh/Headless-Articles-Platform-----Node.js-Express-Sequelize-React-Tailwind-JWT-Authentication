@@ -5,7 +5,7 @@ const router = express.Router();
 //                   📧 Verify Controllers
 // ======================================================================
 const {
-  verifyEmail,
+  verifyUserEmail,           
   verifySubscriberEmail,
   resendVerificationEmail,
 } = require("@/controllers/verify.controller");
@@ -21,11 +21,14 @@ const {
 // ======================================================================
 //                      📧 Verify Routes
 // ======================================================================
-// Verify user email
+
+// Verify user email -  /verify?token=xxx
+router.post("/", verifyLimiter, verifyUserEmail);
+
+// Verify subscriber email - GET /verify/subscriber?token=xxx
+router.get("/subscriber", verifyLimiter, verifySubscriberEmail);
+
+// Resend verification email - POST /verify/resend
 router.post("/resend", resendLimiter, resendVerificationEmail);
-// Resend verification email
-router.post("/", verifyLimiter, verifyEmail);
-// Verify subscriber email
-router.post("/subscriber", verifyLimiter, verifySubscriberEmail);
 
 module.exports = router;

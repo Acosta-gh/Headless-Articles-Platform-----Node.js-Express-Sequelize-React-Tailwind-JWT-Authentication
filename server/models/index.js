@@ -6,6 +6,13 @@ const { Like } = require('@/models/like.model');
 const { Bookmark } = require('@/models/bookmark.model');
 const { Category } = require('@/models/category.model');
 const { Subscriber } = require('@/models/subscriber.model');
+const { Token } = require('@/models/token.model');
+
+// =====================
+// User ↔ Token
+// =====================
+Token.belongsTo(User, { foreignKey: 'userId', as: 'user', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+User.hasMany(Token, { foreignKey: 'userId', as: 'tokens', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
 
 // =====================
 // User ↔ Article
@@ -96,5 +103,6 @@ module.exports = {
   Like,
   Bookmark,
   Category,
-  Subscriber
+  Subscriber,
+  Token
 };

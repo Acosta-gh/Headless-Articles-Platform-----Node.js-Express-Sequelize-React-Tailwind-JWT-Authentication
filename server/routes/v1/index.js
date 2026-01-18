@@ -16,6 +16,7 @@ const categoryRoutes = require('@/routes/v1/category.routes');
 const verifyRoutes = require('@/routes/v1/verify.routes');
 const likeRoutes = require('@/routes/v1/like.routes');
 const subscriberRoutes = require('@/routes/v1/subscriber.routes');
+const authRoutes = require('@/routes/v1/auth.routes');
 
 // ======================================================================
 //                      🚦 Defining Route Handlers
@@ -38,6 +39,8 @@ router.use('/article', articleRoutes);
 router.use('/like', likeRoutes);
 // Use subscriber routes for any requests to /subscriber
 router.use('/subscriber', subscriberRoutes);
+
+router.use('/auth', authRoutes);
 
 // ======================================================================
 //                      🗂️  API v1 Base Route

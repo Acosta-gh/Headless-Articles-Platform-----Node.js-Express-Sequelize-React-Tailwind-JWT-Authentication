@@ -1,86 +1,105 @@
-const { User } = require("@/models/index");
+const { User, Token } = require("@/models/index");
 const { toSafeUser } = require("@/utils/toSafeUser");
-const bcrypt = require("bcrypt");
 const saltRounds = parseInt(process.env.SALT_ROUNDS, 10) || 10;
+const bcrypt = require("bcrypt");
+const { jwtSecret, jwtExpiration } = require("@/config/auth");
+const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
+const { verifyEmail } = require("@/utils/templates/verifyEmail");
+const { sendEmail } = require("@/utils/emailUtils");
+const { resetPasswordEmail } = require("@/utils/templates/resetPasswordEmail");
 
-const getAllUsers = async () => {
+const registerUser = async (data) => {
   try {
-    const users = await User.findAll();
-    const safeUsers = users.map((user) => toSafeUser(user));
-    return safeUsers;
+    const existingEmail = await User.findOne({ where: { email: data.email } });
+
+    if (existingEmail) {
+      throw new Error("Email already in use");
+    }
+
+    const existingUsername = await User.findOne({
+      where: { username: data.username },
+    });
+
+    if (existingUsername) {
+      throw new Error("Username already in use");
+    }
+
+    const hashedPassword = await bcrypt.hash(data.password, saltRounds);
+    const user = await User.create({
+      ...data,
+      password: hashedPassword,
+      admin: false,
+      employee: false,
+      verified: false,
+      banned: false,
+    });
+
+    const safeUser = toSafeUser(user);
+    const authToken = jwt.sign({ id: user.id, admin: user.admin }, jwtSecret, {
+      expiresIn: jwtExpiration,
+    });
+
+    // Generar token de verificación usando el modelo Token
+    const verificationToken = crypto.randomBytes(32).toString("hex");
+    const tokenHash = crypto
+      .createHash("sha256")
+      .update(verificationToken)
+      .digest("hex");
+
+    await Token.create({
+      userId: user.id,
+      tokenHash,
+      type: "email_verify",
+      used: false,
+    });
+
+    const verificationLink = `${process.env.FRONTEND_URL}/#/verify?token=${verificationToken}`;
+    console.log("Verification Link:", verificationLink);
+    const html = verifyEmail(user.name, verificationLink);
+    await sendEmail(user.email, "Verify your email", html);
+
+    return { user: safeUser, token: authToken };
   } catch (error) {
-    throw new Error("Error fetching users: " + error.message);
+    console.error("Error creating user:", error);
+    throw new Error("Error creating user: " + error.message);
   }
 };
 
-const getUserById = async (id) => {
-  console.log("Fetching user with ID:", id);
+const loginUser = async (data) => {
   try {
-    const user = await User.findByPk(id);
+    const user = await User.findOne({ where: { email: data.email } });
+
     if (!user) {
-      throw new Error("User not found");
+      return { error: "User not found" };
     }
-    return toSafeUser(user);
+
+    if (user.banned) {
+      return { error: "User is banned. Contact support for more information." };
+    }
+
+    const isPasswordValid = await bcrypt.compare(data.password, user.password);
+    if (!isPasswordValid) {
+      return { error: "Incorrect password" };
+    }
+
+    if (!user.verified) {
+      return {
+        error: "Email not verified. Please check your inbox.",
+        user: toSafeUser(user),
+      };
+    }
+
+    const token = jwt.sign({ id: user.id, admin: user.admin }, jwtSecret, {
+      expiresIn: jwtExpiration,
+    });
+
+    return { user: toSafeUser(user), token };
   } catch (error) {
-    throw new Error("Error fetching user: " + error.message);
+    console.error("Login error:", error);
+    return { error: "Internal server error" };
   }
 };
-
-const updateUser = async (id, data) => {
-  try {
-    const user = await User.findByPk(id);
-    if (!user) {
-      throw new Error("User not found");
-    }
-
-    if (data.email) {
-      const existingEmail = await User.findOne({
-        where: { email: data.email },
-      });
-      if (existingEmail && existingEmail.id !== id) {
-        throw new Error("Email already in use");
-      }
-    }
-
-    if (data.username) {
-      const existingUsername = await User.findOne({
-        where: { username: data.username },
-      });
-      if (existingUsername && existingUsername.id !== id) {
-        throw new Error("Username already in use");
-      }
-    }
-
-    if (user.admin && data.banned) {
-      throw new Error("Cannot ban an admin user");
-    }
-
-    // Si se actualiza la contraseña, hashearla
-    if (data.password) {
-      data.password = await bcrypt.hash(data.password, saltRounds);
-    }
-
-    await user.update(data);
-
-    return toSafeUser(user);
-  } catch (error) {
-    throw new Error("Error updating user: " + error.message);
-  }
-};
-
-const deleteUser = async (id) => {
-  try {
-    const user = await User.findByPk(id);
-    if (!user) {
-      throw new Error("User not found");
-    }
-    await user.destroy();
-    return true;
-  } catch (error) {
-    throw new Error("Error deleting user: " + error.message);
-  }
-};
-
 /**
  * Envía email para resetear contraseña
  */
@@ -118,7 +137,7 @@ const sendPasswordResetEmail = async (email) => {
       used: false,
     });
 
-    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+    const resetLink = `${process.env.FRONTEND_URL}/#/reset?token=${resetToken}`;
     const html = resetPasswordEmail(user.name, resetLink);
     await sendEmail(user.email, "Reset your password", html);
 
@@ -203,10 +222,8 @@ const resetPassword = async (token, newPassword) => {
 };
 
 module.exports = {
-  getAllUsers,
-  getUserById,
-  updateUser,
-  deleteUser,
+  registerUser,
+  loginUser,
   sendPasswordResetEmail,
   resetPassword,
 };

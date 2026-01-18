@@ -9,12 +9,14 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, Loader2, XCircle } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 
 function Verify() {
   // -------------------
   //      🪝 Hooks
   // -------------------
   const { loading, error, success, verifyEmail } = useVerify();
+  const navigate = useNavigate();
 
   useEffect(() => {
     let token = null;
@@ -80,12 +82,8 @@ function Verify() {
         </CardContent>
 
         <CardFooter className="flex justify-center">
-          <Button
-            variant="default"
-            onClick={() => (window.location.href = "/login")}
-            disabled={loading}
-          >
-            {success ? "Go to Login" : "Back to Home"}
+          <Button variant="default" asChild disabled={loading}>
+            <Link to="/login">{success ? "Go to Login" : "Back to Home"}</Link>
           </Button>
         </CardFooter>
       </Card>

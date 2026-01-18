@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import {
   register as registerService,
   login as loginService,
+  forgot as forgotService,
+  reset as resetService
 } from "@/services/auth.service";
 
 import { resendVerificationEmail as resendEmailService } from "@/services/verify.services";
@@ -157,7 +159,7 @@ export function useAuth() {
       throw new Error(
         `Please wait ${mins}:${secs
           .toString()
-          .padStart(2, "0")} before resending`
+          .padStart(2, "0")} before resending`,
       );
     }
 
@@ -179,8 +181,8 @@ export function useAuth() {
         setCooldown(email, Date.now()); // Synchronize cooldown
         throw new Error(
           `Too many requests. Please wait ${Math.ceil(
-            retryAfter / 60
-          )} minutes.`
+            retryAfter / 60,
+          )} minutes.`,
         );
       }
 
@@ -221,7 +223,7 @@ export function useAuth() {
                   .padStart(2, "0")} before resending`,
                 {
                   duration: 10000,
-                }
+                },
               );
             } else {
               toast.error("Email has not been verified.", {
@@ -241,7 +243,7 @@ export function useAuth() {
                         "Verification email sent! Check your inbox.",
                         {
                           id: toastId,
-                        }
+                        },
                       );
                     } catch (error) {
                       // Error
@@ -286,7 +288,7 @@ export function useAuth() {
         console.error("Login error:", error);
         const message = getErrorMessage(
           error,
-          "Login failed. Please check your credentials and try again."
+          "Login failed. Please check your credentials and try again.",
         );
         toast.error(message);
 
@@ -295,7 +297,7 @@ export function useAuth() {
         setLoading(false);
       }
     },
-    [handleResendVerification]
+    [handleResendVerification],
   );
 
   /**
@@ -321,7 +323,7 @@ export function useAuth() {
       console.error("Registration error:", error);
       const message = getErrorMessage(
         error,
-        "Registration failed. Please try again."
+        "Registration failed. Please try again.",
       );
       toast.error(message);
 
@@ -342,6 +344,62 @@ export function useAuth() {
         onClick: () => {},
       },
     });
+  }, []);
+
+  const forgot = useCallback(async (email) => {
+    setLoading(true);
+
+    try {
+      const data = await forgotService(email);
+
+      if (data.error) {
+        toast.error(data.error);
+        return { success: false, error: data.error };
+      }
+
+      toast.success("If the email exists, a reset link has been sent");
+
+      return { success: true, data };
+    } catch (error) {
+      console.error("Registration error:", error);
+      const message = getErrorMessage(
+        error,
+        "If the email exists, a reset link has been sent",
+      );
+      toast.error(message);
+
+      return { success: false, error: message };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const reset = useCallback(async (credentials) => {
+    setLoading(true);
+
+    try {
+      const data = await resetService(credentials);
+
+      if (data.error) {
+        toast.error(data.error);
+        return { success: false, error: data.error };
+      }
+
+      toast.success("Your password was updated successfully.");
+
+      return { success: true, data };
+    } catch (error) {
+      console.error("Registration error:", error);
+      const message = getErrorMessage(
+        error,
+        "Something went wrong while trying to reset your password.",
+      );
+      toast.error(message);
+
+      return { success: false, error: message };
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   /**
@@ -371,5 +429,7 @@ export function useAuth() {
     loading,
     userId: getUserId(),
     token: getToken(),
+    forgot,
+    reset
   };
 }

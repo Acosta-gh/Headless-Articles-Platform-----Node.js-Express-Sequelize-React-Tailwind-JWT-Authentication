@@ -3,7 +3,9 @@ export const verifyEmail = (name, verificationLink) => `
     
     <!-- Header -->
     <div style="background-color: #f3f4f6; padding: 20px; text-align: center;">
-      <h2 style="margin: 0; font-size: 22px; color: #111827;">Welcome aboard, ${name || "there"}! 👋</h2>
+      <h2 style="margin: 0; font-size: 22px; color: #111827;">Welcome aboard, ${
+        name || "there"
+      }! 👋</h2>
     </div>
 
     <!-- Body -->
@@ -18,6 +20,14 @@ export const verifyEmail = (name, verificationLink) => `
          style="display: inline-block; background-color: #111827; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 500;">
         Verify email address
       </a>
+      
+      <p style="margin-top: 16px; font-size: 14px; word-break: break-all;">
+        Or copy and paste this link into your browser:
+        <br />
+        <a href="${verificationLink}" style="color: #2563eb;">
+          ${verificationLink}
+        </a>
+      </p>
       <p style="color: #71717a; font-size: 14px; margin-top: 24px;">
         This link will expire in 24 hours.
       </p>

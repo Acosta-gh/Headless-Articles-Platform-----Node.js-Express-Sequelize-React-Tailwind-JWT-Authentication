@@ -24,6 +24,8 @@ const Verify = lazy(() => import("./pages/Verify"));
 const ArticlePage = lazy(() => import("./pages/Article.jsx"));
 const Services = lazy(() => import("./pages/Services.jsx"));
 const AllArticles = lazy(() => import("./pages/AllArticles.jsx"));
+const ForgotPage = lazy(() => import("./pages/ForgotPage.jsx"));
+const ResetPage = lazy(() => import("./pages/ResetPage.jsx"));
 
 // 🔐 Protected Routes
 function ProtectedRoute({ children, requireAdmin = false }) {
@@ -123,6 +125,22 @@ const router = createHashRouter([
     element: (
       <Suspense fallback={<Loading />}>
         <LoginPage />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/forgot",
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ForgotPage />
+      </Suspense>
+    ),
+  },
+    {
+    path: "/reset",
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ResetPage />
       </Suspense>
     ),
   },

@@ -1,6 +1,7 @@
 "use strict";
+
 module.exports = {
-  up: async (queryInterface, Sequelize) => {
+  async up(queryInterface, Sequelize) {
     await queryInterface.createTable("Users", {
       id: {
         allowNull: false,
@@ -8,18 +9,62 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      username: { type: Sequelize.STRING, allowNull: false, unique: true },
-      verified: { type: Sequelize.BOOLEAN, defaultValue: false },
-      email: { type: Sequelize.STRING, allowNull: false, unique: true },
-      admin: { type: Sequelize.BOOLEAN, defaultValue: false },
-      banned: { type: Sequelize.BOOLEAN, defaultValue: false },
-      password: { type: Sequelize.STRING, allowNull: false },
-      createdAt: { allowNull: false, type: Sequelize.DATE },
-      updatedAt: { allowNull: false, type: Sequelize.DATE },
-      deletedAt: { type: Sequelize.DATE },
+
+      username: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        unique: true,
+      },
+
+      verified: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
+
+      email: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        unique: true,
+      },
+
+      admin: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
+
+      banned: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
+
+      password: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+
+      createdAt: {
+        allowNull: false,
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.fn("NOW"),
+      },
+
+      updatedAt: {
+        allowNull: false,
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.fn("NOW"),
+      },
+
+      deletedAt: {
+        type: Sequelize.DATE,
+        allowNull: true,
+      },
     });
   },
-  down: async (queryInterface) => {
+
+  async down(queryInterface) {
     await queryInterface.dropTable("Users");
   },
 };

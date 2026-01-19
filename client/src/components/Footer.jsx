@@ -6,6 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { GithubIcon, TwitterIcon, Shell } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { Link } from "react-router-dom";
+import auroraImage from "@/assets/logo.png";
 
 import { useNewsletter } from "@/hooks/useNewsletter";
 
@@ -67,9 +68,13 @@ const Footer = () => {
             {/* Logo and Navigation */}
             <div>
               <Link to="/" className="flex items-center gap-3">
-                <Shell className="h-7 w-7" />
+                <img
+                  src={auroraImage}
+                  alt="Aurora Logo"
+                  className="h-8 w-auto object-contain md:h-10"
+                />
                 <span className="font-bold text-xl text-foreground">
-                  FOSS News
+                  Aurora Labs Blog
                 </span>
               </Link>
               <ul className="mt-6 flex gap-4 flex-col">
@@ -105,7 +110,8 @@ const Footer = () => {
                 </Button>
               </form>
               <p className="text-xs text-muted-foreground mt-2">
-                Subscribe to receive the latest news articles directly in your inbox.
+                Subscribe to receive the latest news articles directly in your
+                inbox.
               </p>
             </div>
           </div>
@@ -118,7 +124,7 @@ const Footer = () => {
                 to="/"
                 className="hover:underline text-foreground font-semibold"
               >
-                FOSS News
+                Aurora Labs
               </Link>
               . All rights reserved.
             </span>

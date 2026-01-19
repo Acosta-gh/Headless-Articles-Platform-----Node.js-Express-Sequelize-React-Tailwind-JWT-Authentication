@@ -1,6 +1,9 @@
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+
+import auroraImage from "@/assets/logo.png";
+
 import {
   Menu,
   Mountain,
@@ -9,7 +12,7 @@ import {
   User,
   Newspaper,
   LogOut,
-  Home
+  Home,
 } from "lucide-react";
 
 import { useLocation, useNavigate } from "react-router-dom";
@@ -58,7 +61,12 @@ function Navbar() {
       <div className="flex h-16 items-center justify-between px-4 md:px-6 lg:px-8 ">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-5 mr-6 flex-shrink-0">
-          <Shell className="h-6 w-6" />
+          {/*  <Shell className="h-6 w-6" /> */}
+          <img
+            src={auroraImage}
+            alt="Aurora Logo"
+            className="h-8 w-auto object-contain md:h-10"
+          />
         </Link>
 
         {/* Desktop Navigation */}

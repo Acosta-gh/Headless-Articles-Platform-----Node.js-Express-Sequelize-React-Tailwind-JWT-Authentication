@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Spinner } from "@/components/ui/spinner";
 import { useAuth } from "@/hooks/useAuth";
 import { Fade } from "react-awesome-reveal";
+import { ArrowLeft } from "lucide-react";
 
 const ForgotPage = ({
   heading = "Reset Password",
@@ -17,6 +18,7 @@ const ForgotPage = ({
   //      🪝 Hooks
   // -------------------
   const { forgot, loading } = useAuth();
+  const navigate = useNavigate();
 
   // -------------------
   //      📦 State
@@ -42,7 +44,7 @@ const ForgotPage = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
     const result = await forgot({ email });
-    
+
     if (!result.success) {
       return;
     }
@@ -54,6 +56,16 @@ const ForgotPage = ({
   return (
     <Fade cascade triggerOnce duration={500}>
       <section className="bg-muted h-screen">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => navigate(-1)}
+          className="absolute top-4 left-4 md:top-6 md:left-6 gap-2 group "
+        >
+          <ArrowLeft className="h-4 w-4  " />
+          <span>Go Back</span>
+        </Button>{" "}
+
         <div className="flex h-full items-center justify-center">
           <div className="flex flex-col items-center gap-6 lg:justify-start">
             {/* Forgot Password Form */}
@@ -62,7 +74,7 @@ const ForgotPage = ({
               className="min-w-sm border-muted bg-background flex w-full max-w-sm flex-col items-center gap-y-4 rounded-md border px-6 py-8 shadow-md"
             >
               {heading && <h1 className="text-xl font-semibold">{heading}</h1>}
-              
+
               {success ? (
                 <div className="text-center">
                   <p className="text-muted-foreground text-sm">

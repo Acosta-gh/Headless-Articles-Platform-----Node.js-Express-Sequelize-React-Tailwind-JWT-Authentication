@@ -26,9 +26,9 @@ export const useNewsletter = () => {
       setError(error.message);
       
       const errorMessage =
-        error.response?.data?.error || 
-        error.response?.data?.message ||
-        error.message ||
+      //  error.response?.data?.error || 
+      //  error.response?.data?.message ||
+      //  error.message ||
         "An error occurred";
 
       console.log("Subscription error message:", errorMessage);

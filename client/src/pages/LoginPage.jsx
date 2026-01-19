@@ -69,11 +69,11 @@ const LoginPage = ({
         <Button
           variant="outline"
           size="sm"
-          onClick={() => navigate(-1)}
+          onClick={() => navigate("/")}
           className="absolute top-4 left-4 md:top-6 md:left-6 gap-2 group "
         >
           <ArrowLeft className="h-4 w-4  " />
-          <span>Go Back</span>
+          <span>Go Home</span>
         </Button>{" "}
         <div className="flex h-full items-center justify-center">
           <div className="flex flex-col items-center gap-6 lg:justify-start">

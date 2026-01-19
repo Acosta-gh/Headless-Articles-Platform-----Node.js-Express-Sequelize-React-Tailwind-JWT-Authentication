@@ -12,11 +12,18 @@ module.exports = {
 
       userId: {
         type: Sequelize.INTEGER,
-        allowNull: false,
+        allowNull: true,
         references: {
           model: "Users",
           key: "id",
         },
+        onDelete: "CASCADE",
+      },
+
+      subscriberId: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+        references: { model: "Subscribers", key: "id" },
         onDelete: "CASCADE",
       },
 
@@ -56,7 +63,7 @@ module.exports = {
   async down(queryInterface) {
     await queryInterface.dropTable("Tokens");
     await queryInterface.sequelize.query(
-      'DROP TYPE IF EXISTS "enum_Tokens_type";'
+      'DROP TYPE IF EXISTS "enum_Tokens_type";',
     );
   },
 };

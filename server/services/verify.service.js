@@ -1,3 +1,9 @@
+/*
+* ========================================================================================
+* ⚠️ This file's code was generated partially or completely by a Large Language Model (LLM).
+* ========================================================================================
+*/
+
 const crypto = require("crypto");
 const bcrypt = require("bcrypt");
 const { User, Subscriber, Token } = require("@/models/index");
@@ -14,7 +20,7 @@ const verifyUserEmail = async (token) => {
     console.log("=== INICIO VERIFICACIÓN ===");
     console.log("Token recibido:", token);
     console.log("Longitud del token:", token.length);
-    
+
     // Hash del token recibido
     const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
     console.log("Token hash generado:", tokenHash);
@@ -29,7 +35,7 @@ const verifyUserEmail = async (token) => {
     });
 
     console.log("Token encontrado en BD:", tokenRecord ? "SÍ" : "NO");
-    
+
     if (!tokenRecord) {
       // Debug adicional: buscar TODOS los tokens de este tipo para ver qué hay
       const allTokens = await Token.findAll({
@@ -38,7 +44,7 @@ const verifyUserEmail = async (token) => {
       });
       console.log("Total tokens email_verify en BD:", allTokens.length);
       console.log("Tokens disponibles:", JSON.stringify(allTokens, null, 2));
-      
+
       throw new Error("Invalid or expired verification token");
     }
 
@@ -92,6 +98,8 @@ const verifyUserEmail = async (token) => {
  */
 const verifySubscriberEmail = async (token) => {
   try {
+    console.log("=== INICIO VERIFICACIÓN SUBSCRIBER ===");
+
     const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
 
     const tokenRecord = await Token.findOne({
@@ -103,37 +111,44 @@ const verifySubscriberEmail = async (token) => {
     });
 
     if (!tokenRecord) {
+      console.log("❌ Token no encontrado");
       throw new Error("Invalid or expired verification token");
     }
 
     // Verificar si el token ya fue usado
     if (tokenRecord.used) {
+      console.log("❌ Token ya usado");
       throw new Error("This verification token has already been used");
     }
 
     const subscriber = tokenRecord.subscriber;
 
     if (!subscriber) {
+      console.log("❌ Subscriber no encontrado");
       throw new Error("Subscriber not found");
     }
+
+    console.log("Subscriber encontrado:", subscriber.email);
 
     if (subscriber.verified) {
       tokenRecord.used = true;
       tokenRecord.usedAt = new Date();
       await tokenRecord.save();
+      console.log("⚠️ Subscriber ya verificado");
       return { message: "Email already verified" };
     }
 
     subscriber.verified = true;
     await subscriber.save();
-    
+
     tokenRecord.used = true;
     tokenRecord.usedAt = new Date();
     await tokenRecord.save();
 
+    console.log("✅ Verificación exitosa para subscriber:", subscriber.email);
     return { message: "Email verified successfully" };
   } catch (error) {
-    console.error("Error verifying subscriber email:", error);
+    console.error("❌ Error verifying subscriber email:", error.message);
     throw error;
   }
 };
@@ -161,18 +176,23 @@ const resendVerificationEmail = async (email) => {
           type: "email_verify",
           used: false,
         },
-      }
+      },
     );
 
     // Generar nuevo token
     const verificationToken = crypto.randomBytes(32).toString("hex");
-    console.log("Nuevo token generado:", verificationToken);
-    
+
     const tokenHash = crypto
       .createHash("sha256")
       .update(verificationToken)
       .digest("hex");
-    
+
+    await Token.create({
+      subscriberId: subscriber.id,
+      tokenHash,
+      type: "email_verify",
+      used: false,
+    });
     console.log("Hash del nuevo token:", tokenHash);
 
     await Token.create({
@@ -184,7 +204,7 @@ const resendVerificationEmail = async (email) => {
 
     const verificationLink = `${process.env.FRONTEND_URL}/verify?token=${verificationToken}`;
     console.log("Link de verificación:", verificationLink);
-    
+
     const html = verifyEmail(user.name, verificationLink);
     await sendEmail(user.email, "Verify your email", html);
 
@@ -195,10 +215,8 @@ const resendVerificationEmail = async (email) => {
   }
 };
 
-
-
 module.exports = {
   verifyUserEmail,
   verifySubscriberEmail,
-  resendVerificationEmail
+  resendVerificationEmail,
 };

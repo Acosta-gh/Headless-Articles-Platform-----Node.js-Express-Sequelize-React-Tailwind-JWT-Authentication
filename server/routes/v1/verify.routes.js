@@ -25,8 +25,8 @@ const {
 // Verify user email -  /verify?token=xxx
 router.post("/", verifyLimiter, verifyUserEmail);
 
-// Verify subscriber email - GET /verify/subscriber?token=xxx
-router.get("/subscriber", verifyLimiter, verifySubscriberEmail);
+// Verify subscriber email -  /verify/subscriber?token=xxx
+router.post("/subscriber", verifyLimiter, verifySubscriberEmail);
 
 // Resend verification email - POST /verify/resend
 router.post("/resend", resendLimiter, resendVerificationEmail);

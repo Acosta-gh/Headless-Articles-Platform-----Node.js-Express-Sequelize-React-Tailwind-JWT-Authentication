@@ -1,5 +1,9 @@
 import { useEffect, useState, useCallback } from "react";
-import { verifyEmail as verifyEmailService, resendVerificationEmail as resendEmailService } from "@/services/verify.services";
+import {
+  verifyEmail as verifyEmailService,
+  resendVerificationEmail as resendEmailService,
+  verifyEmailSubscriber as verifyEmailSubscriberService,
+} from "@/services/verify.services";
 
 export const useVerify = () => {
   const [loading, setLoading] = useState(false);
@@ -16,6 +20,20 @@ export const useVerify = () => {
     setSuccess(false);
     try {
       await verifyEmailService(token);
+      setSuccess(true);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const verifyEmailSubscriber = useCallback(async (token) => {
+    setLoading(true);
+    setError(null);
+    setSuccess(false);
+    try {
+      await verifyEmailSubscriberService(token);
       setSuccess(true);
     } catch (error) {
       setError(error.message);
@@ -42,5 +60,12 @@ export const useVerify = () => {
     }
   }, []);
 
-  return { loading, error, success, verifyEmail, resendVerificationEmail };
+  return {
+    loading,
+    error,
+    success,
+    verifyEmail,
+    resendVerificationEmail,
+    verifyEmailSubscriber,
+  };
 };

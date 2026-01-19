@@ -15,6 +15,13 @@ export const verifyEmail = async (token) => {
   return response.data;
 };
 
+export const verifyEmailSubscriber  = async (token) => {
+  const response = await axios.post(`${VERIFY_URL}/subscriber`, null, {
+    params: { token },
+  });
+  return response.data;
+};
+
 /** Resend verification email
  * @param {string} email - User email
  * @returns {Promise<Object>} Resend result

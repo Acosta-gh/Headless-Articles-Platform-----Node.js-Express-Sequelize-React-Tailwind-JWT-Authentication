@@ -26,6 +26,7 @@ const Services = lazy(() => import("./pages/Services.jsx"));
 const AllArticles = lazy(() => import("./pages/AllArticles.jsx"));
 const ForgotPage = lazy(() => import("./pages/ForgotPage.jsx"));
 const ResetPage = lazy(() => import("./pages/ResetPage.jsx"));
+const VerifySubscriber = lazy(() => import("./pages/VerifySubscriber.jsx"));
 
 // 🔐 Protected Routes
 function ProtectedRoute({ children, requireAdmin = false }) {
@@ -157,6 +158,14 @@ const router = createHashRouter([
     element: (
       <Suspense fallback={<Loading />}>
         <Verify />
+      </Suspense>
+    ),
+  },
+    {
+    path: "/subscriber",
+    element: (
+      <Suspense fallback={<Loading />}>
+        <VerifySubscriber />
       </Suspense>
     ),
   },

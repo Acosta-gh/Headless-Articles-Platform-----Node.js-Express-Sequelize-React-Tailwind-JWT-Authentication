@@ -6,7 +6,11 @@ const Token = sequelize.define(
   {
     userId: {
       type: DataTypes.UUID,
-      allowNull: false,
+      allowNull: true,
+    },
+    subscriberId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
     },
 
     tokenHash: {
@@ -36,7 +40,7 @@ const Token = sequelize.define(
     timestamps: true,
     updatedAt: false,
     tableName: "Tokens",
-  }
+  },
 );
 
 module.exports = { Token };

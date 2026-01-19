@@ -37,8 +37,9 @@ const createArticle = async (data) => {
 
     setImmediate(async () => {
       try {
+        console.log("Mandando emails a subscriptores");
         const subscribers = await Subscriber.findAll({ where: { verified: true } });
-        const articleLink = `${process.env.FRONTEND_URL}/article/${article.id}`;
+        const articleLink = `${process.env.FRONTEND_URL}#/article/${article.id}`;
         const html = newArticleNotification(articleLink, article.title);
 
         for (const sub of subscribers) {

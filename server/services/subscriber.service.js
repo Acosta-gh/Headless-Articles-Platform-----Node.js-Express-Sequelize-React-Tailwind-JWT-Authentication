@@ -1,12 +1,11 @@
-const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 
-const { Subscriber } = require("@/models/index");
+const { Subscriber, Token } = require("@/models/index");
 
-const { verifySubscriberEmail } = require("@/utils/templates/verifySubscriberEmail");
+const {
+  verifySubscriberEmail,
+} = require("@/utils/templates/verifySubscriberEmail");
 const { sendEmail } = require("@/utils/emailUtils");
-
-const EMAIL_SECRET_KEY =
-  process.env.EMAIL_SECRET_KEY || "your_email_secret_key";
 
 const registerSubscriber = async (data) => {
   try {
@@ -23,11 +22,23 @@ const registerSubscriber = async (data) => {
       verified: false,
     });
 
-    const emailToken = jwt.sign({ id: subscriber.id }, EMAIL_SECRET_KEY, {
-      expiresIn: "1d",
+    const verificationToken = crypto.randomBytes(32).toString("hex");
+
+    const tokenHash = crypto
+      .createHash("sha256")
+      .update(verificationToken)
+      .digest("hex");
+
+    await Token.create({
+      subscriberId: subscriber.id,
+      tokenHash,
+      type: "email_verify",
+      used: false,
     });
 
-    const verificationLink = `${process.env.FRONTEND_URL}/verify-subscriber?token=${emailToken}`;
+    const verificationLink = `${process.env.FRONTEND_URL}#/subscriber?token=${verificationToken}`;
+    console.log("Link de verificación:", verificationLink);
+
     const html = verifySubscriberEmail(verificationLink);
     await sendEmail(subscriber.email, "Verify your email", html);
 

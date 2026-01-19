@@ -9,6 +9,12 @@ const { Subscriber } = require('@/models/subscriber.model');
 const { Token } = require('@/models/token.model');
 
 // =====================
+// Subscriber ↔ Token
+// =====================
+Token.belongsTo(Subscriber, { foreignKey: 'subscriberId', as: 'subscriber', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+Subscriber.hasMany(Token, { foreignKey: 'subscriberId', as: 'tokens', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+
+// =====================
 // User ↔ Token
 // =====================
 Token.belongsTo(User, { foreignKey: 'userId', as: 'user', onDelete: 'CASCADE', onUpdate: 'CASCADE' });

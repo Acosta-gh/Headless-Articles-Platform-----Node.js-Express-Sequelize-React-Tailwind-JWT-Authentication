@@ -6,8 +6,20 @@ const path = require('path');
 const app = express();
 
 // Middleware setup
-app.use(cors());
-app.use(express.json());
+app.use(cors({
+  origin: [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "https://auroralabs.com.ar",
+    "https://blog.auroralabs.com.ar"
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
+app.options("*", cors());
+app.use(express.json({ limit: "20mb" }));
+app.use(express.urlencoded({ extended: true, limit: "20mb" }));
 
 // Serve static files from the "uploads" directory
 const uploadDir = path.resolve(__dirname, './uploads');

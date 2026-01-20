@@ -41,7 +41,6 @@ router.use('/like', likeRoutes);
 router.use('/subscriber', subscriberRoutes);
 
 router.use('/auth', authRoutes);
-
 // ======================================================================
 //                      🗂️  API v1 Base Route
 // ======================================================================

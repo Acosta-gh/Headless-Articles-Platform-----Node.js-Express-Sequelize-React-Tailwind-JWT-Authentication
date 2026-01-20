@@ -14,7 +14,8 @@ app.use(cors({
     "https://blog.auroralabs.com.ar"
   ],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
+  allowedHeaders: ["Content-Type", "Authorization", "x-tempid-token"],
+  credentials: true 
 }));
 
 app.options("/", cors());
